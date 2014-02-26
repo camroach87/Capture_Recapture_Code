@@ -1,15 +1,15 @@
 # Original code courtesy of Richard Huggins, University of Melbourne
 # Constructs population matrices for open populations
 
-Pop.Mat.0 <- function(num,T,beta)
+Pop.Mat.0 <- function(num,t,beta)
 {
   
-  entry <- sample(1:T,num,replace=TRUE); #uniform entry
+  entry <- sample(1:t,num,replace=TRUE); #uniform entry
   surv <- rgeom(num,beta);#geometric survival
   leave <- entry+surv;
-  leave <- pmin(leave,T);
+  leave <- pmin(leave,t);
   
-  Pop <- matrix(0,num,T);
+  Pop <- matrix(0,num,t);
   
   for(k in 1:num)
   {
@@ -21,10 +21,10 @@ Pop.Mat.0 <- function(num,T,beta)
 
 
 
-Pop.Mat <- function(num,T,R,beta)
+Pop.Mat <- function(num,t,R,beta)
 {
   
-  Pop.0 <- Pop.Mat.0(num,T+R,beta);
+  Pop.0 <- Pop.Mat.0(num,t+R,beta);
   
   Pop <- Pop.0[,-(1:R)];#remove initial generations so stable
   
@@ -34,22 +34,3 @@ Pop.Mat <- function(num,T,R,beta)
   
   return(Pop);
 }
-
-####################################################
-
-# beta <- 0.01;
-# 
-# num <- 10000;
-# 
-# T <- 1000;
-# 
-# R <- 500;
-# 
-# Pop <- Pop.Mat(num,T,R,beta);
-# 
-# N <- apply(Pop,2,sum);
-# 
-# plot(table(apply(Pop,1,sum)))
-# 
-# 
-# plot(N,type="l");

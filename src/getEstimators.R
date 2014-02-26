@@ -86,3 +86,10 @@ calcChaoMt <- function(mtrxCapt) {
   return(output)
   
 }
+
+
+
+
+calcJS <- function(mtrxCapt) {
+  
+}

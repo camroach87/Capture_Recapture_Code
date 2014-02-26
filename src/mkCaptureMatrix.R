@@ -68,13 +68,8 @@ mkCloseSimMtrx <- function(N.0, t, pCapture) {
 
 
 
-mkOpenSimMtrx <- function(N.0, t, p, beta) {  
-  R <- 100; # stabilisation in period
+mkOpenSimMtrx <- function(Pop, t, p, beta) {  
 
-  #Fix +1 and R
-  Pop <- Pop.Mat(N.0,t,R,beta);
-  
-  #mtrxP <- Pop*matrix(runif(N.0*(t-1)),N.0,t)
   mtrxP <- Pop*matrix(runif(nrow(Pop)*t),nrow(Pop),t)
   
   mtrxCapt <- ifelse(mtrxP>=(1-p),1,0) 

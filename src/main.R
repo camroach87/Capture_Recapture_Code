@@ -21,23 +21,43 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 
 
-#### Usage ####
-
-# Parameters
+#### Initialise parameters ####
 N.0   <- 5000
 t     <- 20
 p     <- 0.03
 beta  <- 0.002
 
-# Generate capture matrix
-mtrxCapt <- mkOpenSimMtrx(N.0, t, p, beta)
+#### Generate population and capture matrices ####
+#Uncomment scenario to run
+
+# Open population sim
+R <- 500 #burn in for population stability
+mtrxPop <- Pop.Mat(N.0,t,R,beta)
+mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
+
+
+
+# # Closed population sim
+# 
+# 
+# 
+# # Trout Cod data analysis
+# 
+# 
+# 
+
+
+
+
 
 # Calculate estimators
-popEst <- CR_RobustDesign(mtrxCapt[[1]],6)
+estCrRobust <- CR_RobustDesign(mtrxCapt[[1]],6)
+
+
 
 #par(mfrow=c(1,1))
-plot(popEst, type="l", col="red", 
-     ylim=c(min(mtrxCapt[[2]],popEst[[2]]),max(mtrxCapt[[2]],popEst[[2]])))
+plot(estCrRobust, type="l", col="red", 
+     ylim=c(min(mtrxCapt[[2]],estCrRobust[[2]]),max(mtrxCapt[[2]],estCrRobust[[2]])))
 points(mtrxCapt[[2]], col="blue")
 
 

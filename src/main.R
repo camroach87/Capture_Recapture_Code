@@ -4,11 +4,17 @@
 # DATE: 24/2/2014
 # DESCRIPTION: Sets directories and calls programs
 
+rm(list=ls())
+
+require(lubridate)
+require(ggplot2)
+require(plyr)
+
 
 #### Set directories ####
-dataDir <- file.path("./data")
-srcDir <- file.path("./src")
-outputDir <- file.path("./output")
+dataDir <- "./data"
+srcDir <- "./src"
+outputDir <- "./output"
 
 
 
@@ -38,13 +44,20 @@ mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
 
 
 # # Closed population sim
-# 
-# 
-# 
+
+
+
+
 # # Trout Cod data analysis
-# 
-# 
-# 
+
+data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
+data$surveydate <- dmy_hm(data$surveydate)
+
+# add year to data
+data$year <- format(data$surveydate, "%Y")
+
+mtrxCapt <- table(data$idfish, data$year)
+
 
 
 
@@ -52,8 +65,6 @@ mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
 
 # Calculate estimators
 estCrRobust <- CR_RobustDesign(mtrxCapt[[1]],6)
-
-
 
 #par(mfrow=c(1,1))
 plot(estCrRobust, type="l", col="red", 
@@ -64,7 +75,7 @@ points(mtrxCapt[[2]], col="blue")
 
 #### Results ####
 
-# #Plot estimates
+#Plot estimators
 # #plot(N_rmark ~ sampOcc, type="l", col="red", ylim=c(0,max(sChao)))
 # #lines(sampOcc[1:nsampOcc], sChao,col=colors()[25+6*window])
 # if (sim=="Y") {

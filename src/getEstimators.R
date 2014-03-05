@@ -90,11 +90,20 @@ calcChaoMt <- function(mtrxCapt) {
 calcJS <- function(mtrxCapt) {
     #Jolly Seber
     n <- colSums(mtrxCapt)
-    m <- calcMarked(mtrxCapt)
-#     R <- calcReleased(mtrxCapt)
-#     Z <- calcZ(mtrxCapt)
-#     r <- calcRecapt(mtrxCapt)
-   
+    
+    m <- NA
+    R <- NA
+    Z <- NA
+    r <- NA
+    
+    for (i in 2:ncol(mtrxCapt)){
+      m[i] <- calcMarked(mtrxCapt[,1:i])
+      R <- m # assuming all released
+      #       Z <- calcZ(mtrxCapt)
+      #       r <- calcRecapt(mtrxCapt)
+    }
+    
+
     M <- m + R*Z/r
     N <- n*M[1:length(n)]/m
     

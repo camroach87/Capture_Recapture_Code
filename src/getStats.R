@@ -9,3 +9,12 @@
 
 ################################## Functions ##################################
 
+calcMarked <- function(mtrxCapt) {
+  # Checks if animal has been captured more than once. Only can be used to
+  # determine if animal is captured prior to the latest sampling occasion.
+  nCaptures <- apply(mtrxCapt,1,sum)
+  
+  m <- length(nCaptures[nCaptures>1])
+  
+  return(m)
+}

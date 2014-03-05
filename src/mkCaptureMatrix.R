@@ -8,53 +8,7 @@
 
 
 
-
-
-#### Functions ####
-
-mkCaptureMtrx_years <- function(datafile = "TC_Data_Charles.csv") {
-  # Constructs a capture matrix using sourcefile in format of TC_Data_Charles.csv.
-  data <- read.csv(file.path(dataDir,datafile));
-  
-  D <- as.Date(data$surveydate, format="%d/%m/%Y")
-  tabD <- table(D)
-  
-  # add year to data
-  data[10:11, "year"] <- NA
-  data$year <- as.numeric(format(D, "%Y"))
-  
-  
-  # useful
-  mtrxCapt <- table(data$idfish, data$year)
-  
-  return(mtrxCapt)
-}
-
-
-
-
-
-mkCaptureMtrx <- function(datafile = "TC_Data_Charles.csv") {
-  # Constructs a capture matrix using sourcefile in format of TC_Data_Charles.csv.
-  data <- read.csv(file.path(dataDir,datafile));
-  
-  D <- as.Date(data$surveydate, format="%d/%m/%Y")
-  tabD <- table(D)
-  
-  # add day to data
-  data[10:11, "day"] <- NA
-  data$day <- as.numeric(D)
-  
-  
-  # useful
-  mtrxCapt <- table(data$idfish, data$day)
-  
-  return(mtrxCapt)
-}
-
-
-
-
+################################## Functions ##################################
 
 mkCloseSimMtrx <- function(N.0, t, pCapture) {
   # Simulates closed population. N.0 is initial population size.
@@ -74,9 +28,6 @@ mkOpenSimMtrx <- function(Pop, t, p, beta) {
   
   mtrxCapt <- ifelse(mtrxP>=(1-p),1,0) 
   
-  return(list(mtrxCapt, colSums(Pop)))
+  return(mtrxCapt)
   
 }
-
-
-

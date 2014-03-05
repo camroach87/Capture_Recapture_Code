@@ -21,6 +21,7 @@ outputDir <- "./output"
 ##### Source functions ####
 source(file.path(srcDir,"mkPopMatrix.R"))     # population matrix functions
 source(file.path(srcDir,"mkCaptureMatrix.R")) # capture matrix functions
+source(file.path(srcDir,"getStats.R"))        # calculates various statistics
 source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 
@@ -43,8 +44,8 @@ mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
 
 
 
-# # Closed population sim
-
+# Closed population sim
+# To do (maybe not required)
 
 
 

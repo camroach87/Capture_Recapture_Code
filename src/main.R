@@ -31,17 +31,17 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 #### Initialise parameters ####
 N.0   <- 5000
 t     <- 20
-p     <- 0.03
+p     <- 0.02
 beta  <- 0.002
 
 #### Generate population and capture matrices ####
 #Uncomment scenario to run
 
 # Open population sim
-R <- 500 #burn in for population stability
-mtrxPop <- Pop.Mat(N.0,t,R,beta)
+burnIn <- 500 #burn in for population stability
+mtrxPop <- Pop.Mat(N.0,t,burnIn,beta)
 mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
-
+N_actual <- apply(mtrxPop,2,sum)
 
 
 # Closed population sim
@@ -49,28 +49,28 @@ mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
 
 
 
-# # Trout Cod data analysis
-
-data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
-data$surveydate <- dmy_hm(data$surveydate)
-
-# add year to data
-data$year <- format(data$surveydate, "%Y")
-
-mtrxCapt <- table(data$idfish, data$year)
-
+# # # Trout Cod data analysis
+# testTroutCod <- function() {
+#   data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
+#   data$surveydate <- dmy_hm(data$surveydate)
+#   
+#   # add year to data
+#   data$year <- format(data$surveydate, "%Y")
+#   
+#   mtrxCapt <- table(data$idfish, data$year)
+# }
 
 
 
 
 
 # Calculate estimators
-estCrRobust <- CR_RobustDesign(mtrxCapt[[1]],6)
+estCrRobust <- CR_RobustDesign(mtrxCapt,8)
 
 #par(mfrow=c(1,1))
 plot(estCrRobust, type="l", col="red", 
-     ylim=c(min(mtrxCapt[[2]],estCrRobust[[2]]),max(mtrxCapt[[2]],estCrRobust[[2]])))
-points(mtrxCapt[[2]], col="blue")
+     ylim=c(min(N_actual,estCrRobust[[2]]),max(N_actual,estCrRobust[[2]])))
+points(apply(mtrxPop,2,sum), col="blue")
 
 
 

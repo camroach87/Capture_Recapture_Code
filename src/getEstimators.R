@@ -90,22 +90,33 @@ calcChaoMt <- function(mtrxCapt) {
 calcJS <- function(mtrxCapt) {
     #Jolly Seber
     n <- colSums(mtrxCapt)
+    k <- ncol(mtrxCapt)
     
-    m <- NA
-    R <- NA
-    Z <- NA
-    r <- NA
+    m <- rep(NA,k)
+    R <- rep(NA,k)
+    Z <- rep(NA,k)
+    r <- rep(NA,k)
     
-    for (i in 2:ncol(mtrxCapt)){
-      m[i] <- calcMarked(mtrxCapt[,1:i])
-      R <- m # assuming all released
-      #       Z <- calcZ(mtrxCapt)
-      #       r <- calcRecapt(mtrxCapt)
+    for (i in 1:k){
+      # gets which animals are captured and which are not captured at time i
+      curCapt <- mtrxCapt[mtrxCapt[,i]>=1,]
+      curNotCapt <- mtrxCapt[mtrxCapt[,i]==0,]
+      
+      # gets statistics
+      if (i>1) {
+        m[i] <- checkCapt(curCapt[,1:(i-1)])
+        R[i] <- m[i] # assuming all released
+        Z[i] <- calcZ(curNotCapt, i)  
+      }
+      
+      if (i<k) {
+        r[i] <- checkCapt(curCapt[,(i+1):k]) #assumes R=m        
+      }
     }
     
 
     M <- m + R*Z/r
-    N <- n*M[1:length(n)]/m
+    N <- n*M/m
     
-    plot(N ~ days, type="l", col="green")
+    return(N)
 }

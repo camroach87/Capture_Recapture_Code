@@ -37,11 +37,40 @@ beta  <- 0.002
 #### Generate population and capture matrices ####
 #Uncomment scenario to run
 
-# Open population sim
-burnIn <- 500 #burn in for population stability
+##### Open population sim ####
+
+# simulate population matrix
+burnIn  <- 500 #burn in for population stability
 mtrxPop <- Pop.Mat(N.0,t,burnIn,beta)
-mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
-N_actual <- apply(mtrxPop,2,sum)
+actN    <- apply(mtrxPop,2,sum)
+
+
+nSims   <- 100
+estNcr  <- matrix(NA,nSims,t)
+estMSE  <- rep(NA,nSims)
+estVar  <- rep(NA,nSims)
+estBias <- rep(NA,nSims)
+
+for (iS in 1:nSims) {
+  #simulate a different capture matrix on each loop
+  mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
+  
+  # Calculate estimators
+  estNcr[iS,] <- CR_RobustDesign(mtrxCapt,4)
+  estMSE[iS] <- sum((estNcr[iS,]-actN)^2)/t
+  estVar[iS] <- sum((estNcr[iS,]-mean(estNcr[iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
+  #estBias[iS] <- 
+}
+
+estNmean <- apply(estNcr,2,mean)
+estBias <- estN
+
+#par(mfrow=c(1,1))
+plot(estNmean, type="p", col="red", 
+     ylim=c(min(actN,estNmean),max(actN,estNmean)))
+points(actN, col="blue")
+legend("bottomright",legend=c("Estimated population","Actual population"),
+       lty=c(1,1),col=c("red","blue"),cex=0.5)
 
 
 # Closed population sim
@@ -64,13 +93,6 @@ N_actual <- apply(mtrxPop,2,sum)
 
 
 
-# Calculate estimators
-estCrRobust <- CR_RobustDesign(mtrxCapt,8)
-
-#par(mfrow=c(1,1))
-plot(estCrRobust, type="l", col="red", 
-     ylim=c(min(N_actual,estCrRobust[[2]]),max(N_actual,estCrRobust[[2]])))
-points(apply(mtrxPop,2,sum), col="blue")
 
 
 

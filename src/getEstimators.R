@@ -48,12 +48,11 @@ CR_RobustDesign <- function(mtrxCapt, window) {
   aChao_endfix[(window+1):(T-window),] <- aChao[,]
   aChao_endfix[(T-window+1):T,] <- t(matrix(aChao[dim(aChao)[1],],2,window))
   # Kernel smoothing
-  sChao <- ksmooth(1:T,aChao_endfix[,1],bandwidth=window)
-  
+  sChao <- ksmooth(1:T,aChao_endfix[,1],bandwidth=window,x.points=1:T)
+  sChao <- sChao[[2]]
   
   # Calculate variance
-  
-  
+  # to do
   
   
   return(sChao)

@@ -9,6 +9,7 @@ rm(list=ls())
 require(lubridate)
 require(ggplot2)
 require(plyr)
+require(reshape2)
 
 
 #### Set directories ####
@@ -78,16 +79,29 @@ legend("bottomright",legend=c("Estimated population","Actual population"),
 
 
 
-# # # Trout Cod data analysis
-# testTroutCod <- function() {
-#   data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
-#   data$surveydate <- dmy_hm(data$surveydate)
-#   
-#   # add year to data
-#   data$year <- format(data$surveydate, "%Y")
-#   
-#   mtrxCapt <- table(data$idfish, data$year)
-# }
+# Trout Cod data analysis
+testTroutCod <- function() {
+  data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
+  data$surveydate <- dmy_hm(data$surveydate)
+  
+  # add year to data
+  data$year <- year(data$surveydate)
+  data$month <- month(data$surveydate)
+  
+  mtrxCaptY <- table(data$idfish, data$year)
+  mtrxCaptD <- table(data$idfish, data$surveydate)
+  
+  cat(length(data$idfish), "captures made.")
+  cat(length(unique(data$idfish)), "unique fish.")
+  
+  # table of yearly and monthly captures
+  acast(data,year~month,length)
+  
+  # table of f_i
+  table(cbind(apply(mtrxCaptY,1,sum)))
+  
+  
+}
 
 
 

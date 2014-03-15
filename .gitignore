@@ -3,3 +3,4 @@
 *.pper
 *.Rproj
 .Rproj.user/
+output/popCheck.csv

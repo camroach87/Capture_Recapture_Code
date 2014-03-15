@@ -104,7 +104,7 @@ calcJS <- function(mtrxCapt) {
       # gets statistics
       if (i>1) {
         m[i] <- checkCapt(curCapt[,1:(i-1)])
-        R[i] <- m[i] # assuming all released
+        R[i] <- n[i] # assuming all released
         Z[i] <- calcZ(curNotCapt, i)  
       }
       

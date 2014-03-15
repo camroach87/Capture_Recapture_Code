@@ -28,9 +28,10 @@ calcZ <- function(curNotCapt, i) {
   # number of members of marked population not captured at sampling occasion i
   # that are captured again later.
   
+  k  <- ncol(curNotCapt)
+  
   if (i<k & i>1) {
-    k  <- ncol(curNotCapt)
-    
+        
     preCapt <- as.matrix(curNotCapt[,1:(i-1)])
     preCapt <- apply(preCapt,1,sum)>=1
     

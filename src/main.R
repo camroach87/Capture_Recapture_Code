@@ -100,7 +100,11 @@ testTroutCod <- function() {
   # table of f_i
   table(cbind(apply(mtrxCaptY,1,sum)))
   
+  N_Y <- calcJS(mtrxCaptY)
+  N_D <- calcJS(mtrxCaptD)
   
+  plot(N_Y, type="l")
+  plot(N_D, type="l")
 }
 
 

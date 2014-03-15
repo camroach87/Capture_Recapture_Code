@@ -97,9 +97,16 @@ calcJS <- function(mtrxCapt) {
     r <- rep(NA,k)
     
     for (i in 1:k){
-      # gets which animals are captured and which are not captured at time i
-      curCapt <- mtrxCapt[mtrxCapt[,i]>=1,]
-      curNotCapt <- mtrxCapt[mtrxCapt[,i]==0,]
+      #cat(i, "\n")
+      # gets marked animals that are not captured at time i
+      curCapt <- as.matrix(mtrxCapt[mtrxCapt[,i]>=1,])
+      curNotCapt <- as.matrix(mtrxCapt[mtrxCapt[,i]==0,])
+      
+      # R converts curCapt to an array when only one animal is captured (or not
+      # captured) which causes trhe resulting matrix to be around the wrong way.
+      # Need to transpose to fix.
+      if (sum(mtrxCapt[,i]>=1)==1) {curCapt <- t(curCapt)}
+      if (sum(mtrxCapt[,i]==0)==1) {curNotCapt <- t(curNotCapt)}
       
       # gets statistics
       if (i>1) {
@@ -113,9 +120,12 @@ calcJS <- function(mtrxCapt) {
       }
     }
     
-
-    M <- m + R*Z/r
-    N <- n*M/m
+#     M <- m + R*Z/r
+#     N <- n*M/m
+        
+    # bias adjusted
+    M <- m + (R+1)*Z/(r+1)
+    N <- (n+1)*M/(m+1)
     
     return(N)
 }

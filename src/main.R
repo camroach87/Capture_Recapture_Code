@@ -115,14 +115,12 @@ testTroutCod <- function() {
   # table of f_i
   table(cbind(apply(mtrxCaptY,1,sum)))
   
-  # table of next recapture year
-  mtrxRecaptY <- mtrxCaptY
-  for (i in 2:ncol(mtrxRecaptY)) {
-    mtrxRecaptY[,i] <- mtrxRecaptY[,i]+mtrxRecaptY[,i-1]
-  }
-  mtrxRecaptY <- mtrxRecaptY - 1
-  
-  
+#   # table of next recapture year
+#   mtrxRecaptY <- mtrxCaptY
+#   for (i in 2:ncol(mtrxRecaptY)) {
+#     mtrxRecaptY[,i] <- mtrxRecaptY[,i]+mtrxRecaptY[,i-1]
+#   }
+#   mtrxRecaptY <- mtrxRecaptY - 1
   
   # Jolly Seber population estimates
   N_Y <- calcJS(mtrxCaptY)

@@ -10,7 +10,7 @@
 
 ################################## Functions ##################################
 
-mkCloseSimMtrx <- function(N.0, t, pCapture) {
+mkCloseCaptMtrx <- function(N.0, t, pCapture) {
   # Simulates closed population. N.0 is initial population size.
   # Assumes capture probabilities are uniformly distributed.
   mtrxCaptProb <- matrix(runif(N.0*t),N.0,t)
@@ -22,7 +22,7 @@ mkCloseSimMtrx <- function(N.0, t, pCapture) {
 
 
 
-mkOpenSimMtrx <- function(Pop, t, p, beta) {  
+mkOpenCaptMtrx <- function(Pop, t, p, beta) {  
 
   mtrxP <- Pop*matrix(runif(nrow(Pop)*t),nrow(Pop),t)
   

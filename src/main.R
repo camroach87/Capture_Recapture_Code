@@ -33,7 +33,7 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 N.0   <- 5000
 t     <- 20
 p     <- 0.02
-beta  <- 0.002
+beta  <- 0.003
 
 #### Generate population and capture matrices ####
 #Uncomment scenario to run
@@ -44,38 +44,54 @@ beta  <- 0.002
 burnIn  <- 500 #burn in for population stability
 mtrxPop <- Pop.Mat(N.0,t,burnIn,beta)
 actN    <- apply(mtrxPop,2,sum)
+nCaptSims   <- 100
 
 
-nSims   <- 100
-estNcr  <- matrix(NA,nSims,t)
-estMSE  <- rep(NA,nSims)
-estVar  <- rep(NA,nSims)
-estBias <- rep(NA,nSims)
+estN     <- list("CR" = matrix(NA,nCaptSims,t),
+                 "JS" = matrix(NA,nCaptSims,t))
+estMSE   <- list("CR" = rep(NA,nCaptSims),
+                 "JS" = rep(NA,nCaptSims))
+estVar   <- list("CR" = rep(NA,nCaptSims),
+                 "JS" = rep(NA,nCaptSims))
+estNmean <- list("CR" = rep(NA,t),
+                 "JS" = rep(NA,t))
 
-for (iS in 1:nSims) {
+
+
+
+for (iS in 1:nCaptSims) {
   #simulate a different capture matrix on each loop
-  mtrxCapt <- mkOpenSimMtrx(mtrxPop, t, p, beta)
+  mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
   
   # Calculate estimators
-  estNcr[iS,] <- CR_RobustDesign(mtrxCapt,4)
-  estMSE[iS] <- sum((estNcr[iS,]-actN)^2)/t
-  estVar[iS] <- sum((estNcr[iS,]-mean(estNcr[iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
-  #estBias[iS] <- 
+  estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,4)
+  estN[["JS"]][iS,] <- calcJS(mtrxCapt)
+  
+  estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
+  estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
+  
+  estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
+  estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
+  
 }
 
-estNmean <- apply(estNcr,2,mean)
-estBias <- estN
+estNmean[["CR"]] <- apply(estN[["CR"]],2,mean)
+estNmean[["JS"]] <- apply(estN[["JS"]],2,mean)
+
+#estBias <- how do I calculate bias here?
+
 
 #par(mfrow=c(1,1))
-plot(estNmean, type="p", col="red", 
-     ylim=c(min(actN,estNmean),max(actN,estNmean)))
+yMin <- min(unlist(estNmean), actN, na.rm=T)
+yMax <- max(unlist(estNmean), actN, na.rm=T)
+plot(estNmean[["CR"]], type="p", col="red", 
+     ylim=c(yMin,yMax))
 points(actN, col="blue")
-legend("bottomright",legend=c("Estimated population","Actual population"),
-       lty=c(1,1),col=c("red","blue"),cex=0.5)
+points(estNmean[["JS"]], col="green")
+legend("bottomright",legend=c("CR estimate", "JS estimate", "Actual population"),
+       pch=c(1,1,1),col=c("red","green","blue"),cex=0.5)
 
 
-# Closed population sim
-# To do (maybe not required)
 
 
 
@@ -105,6 +121,10 @@ testTroutCod <- function() {
   
   plot(N_Y, type="l")
   plot(N_D, type="l")
+  
+  # apply Chao's sparse data estimator
+  N_ChaoY <- calcChaoMt(mtrxCaptY)
+  N_ChaoD <- calcChaoMt(mtrxCaptD)
 }
 
 

@@ -28,9 +28,9 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 
 testOpenSim  <- function() {
-  ##### Open population sim ####
+  # Open population sim
   
-  #### Initialise parameters ####
+  # Initialise parameters
   N.0   <- 5000
   t     <- 20
   p     <- 0.02
@@ -131,32 +131,3 @@ testTroutCod <- function() {
   N_ChaoY <- calcChaoMt(mtrxCaptY)
   N_ChaoD <- calcChaoMt(mtrxCaptD)
 }
-
-
-
-
-
-
-
-
-#### Results ####
-
-#Plot estimators
-# #plot(N_rmark ~ sampOcc, type="l", col="red", ylim=c(0,max(sChao)))
-# #lines(sampOcc[1:nsampOcc], sChao,col=colors()[25+6*window])
-# if (sim=="Y") {
-#   y.up <- max(N_rmark, sChao$y, N.t)
-#   y.down <- min(N_rmark, sChao$y, N.t)
-#   plot(sChao$y ~ c(1:nsampOcc), type="l", col="blue", ylim=c(y.down,y.up))
-#   lines(N_rmark ~ c(1:nsampOcc), type="l", col="pink")
-#   bla<-loess(N_rmark~c(1:nsampOcc))
-#   lines(predict(bla),type="l", col="red")
-#   lines(sampOcc,N.t,col="green")
-# } else {
-#   y.up <- max(N_rmark, sChao$y)
-#   y.down <- min(N_rmark, sChao$y)
-#   plot(sChao$y ~ c(1:nsampOcc), type="l", col="blue", ylim=c(y.down,y.up))
-#   lines(N_rmark ~ c(1:nsampOcc), type="l", col="pink")
-#   bla<-loess(N_rmark~c(1:nsampOcc))
-#   lines(predict(bla),type="l", col="red")
-# }

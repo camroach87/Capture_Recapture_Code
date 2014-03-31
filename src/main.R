@@ -96,6 +96,7 @@ testOpenSim  <- function() {
 testTroutCod <- function() {
   data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
   data$surveydate <- dmy_hm(data$surveydate)
+  data <- data[order(data$surveydate),]
   
   # add year to data
   data$year <- year(data$surveydate)
@@ -116,19 +117,47 @@ testTroutCod <- function() {
   cat("Table of f_i...")
   print(table(cbind(apply(mtrxCaptY,1,sum))))
   
-#   # table of next recapture year
-#   mtrxRecaptY <- mtrxCaptY
-#   for (i in 2:ncol(mtrxRecaptY)) {
-#     mtrxRecaptY[,i] <- mtrxRecaptY[,i]+mtrxRecaptY[,i-1]
-#   }
-#   mtrxRecaptY <- mtrxRecaptY - 1
+  
+  
+  
+  #   # table of next recapture year
+  #   mtrxRecaptY <- mtrxCaptY
+  #   for (i in 2:ncol(mtrxRecaptY)) {
+  #     mtrxRecaptY[,i] <- mtrxRecaptY[,i]+mtrxRecaptY[,i-1]
+  #   }
+  #   mtrxRecaptY <- mtrxRecaptY - 1
   
   # Jolly Seber population estimates
   N_Y <- calcJS(mtrxCaptY)
-  N_D <- calcJS(mtrxCaptD)
+  N_Y.df <- as.data.frame(N_Y)
+  #Taking 1st June to be estimate time for years as most sampling happens
+  #around/before this time.
+  N_Y.df$Date <- ymd(paste0(rownames(N_Y.df),"-05-01"))
+  N_Y.df$Occasion <- c(1:(dim(N_Y.df)[1]))
+  N_Y.df$Method <- "JS on yearly grouped data"
+  rownames(N_Y.df)  <- NULL
+  colnames(N_Y.df)[1] <- "N"
   
-  plot(N_Y, type="l")
-  plot(N_D, type="l")
+  N_D <- calcJS(mtrxCaptD)
+  N_D.df <- as.data.frame(N_D)
+  N_D.df$Date <- ymd(rownames(N_D.df))
+  N_D.df$Occasion <- c(1:(dim(N_D.df)[1]))
+  N_D.df$Method <- "JS on daily grouped data"
+  rownames(N_D.df)  <- NULL
+  colnames(N_D.df)[1] <- "N"
+  
+  
+  # Combine all data frames
+  estN.tidy <- rbind(N_D.df, N_Y.df)
+  
+  # Plots
+  tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
+  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundity for yearly grouping of TC capture data.")
+  tmp <- estN.tidy[estN.tidy$Method=="JS on daily grouped data",]
+  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundity for daily grouping of TC capture data.")
+  ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("Comparison of JS estimate of abundity for daily and yearly grouping of TC capture data.")
+    
+    
   
   # apply Chao's sparse data estimator
   N_ChaoY <- calcChaoMt(mtrxCaptY)

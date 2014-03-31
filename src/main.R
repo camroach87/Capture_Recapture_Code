@@ -104,14 +104,17 @@ testTroutCod <- function() {
   mtrxCaptY <- table(data$idfish, data$year)
   mtrxCaptD <- table(data$idfish, data$surveydate)
   
-  cat(length(data$idfish), "captures made.")
-  cat(length(unique(data$idfish)), "unique fish.")
+  cat(length(data$idfish), "captures made.\n")
+  cat(length(unique(data$idfish)), "unique fish.\n\n")
   
   # table of yearly and monthly captures
-  acast(data,year~month,length)
+  cat("Table of yearly and monthly captures...\n")
+  print(acast(data,year~month,length, value.var="month"))
+  cat("\n")
   
   # table of f_i
-  table(cbind(apply(mtrxCaptY,1,sum)))
+  cat("Table of f_i...")
+  print(table(cbind(apply(mtrxCaptY,1,sum))))
   
 #   # table of next recapture year
 #   mtrxRecaptY <- mtrxCaptY

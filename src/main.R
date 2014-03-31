@@ -28,16 +28,14 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 
 testOpenSim  <- function() {
+  ##### Open population sim ####
+  
   #### Initialise parameters ####
   N.0   <- 5000
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
   
-  #### Generate population and capture matrices ####
-  #Uncomment scenario to run
-  
-  ##### Open population sim ####
   
   # simulate population matrix
   burnIn  <- 500 #burn in for population stability
@@ -46,6 +44,7 @@ testOpenSim  <- function() {
   nCaptSims   <- 100
   
   
+  # initialise lists
   estN     <- list("CR" = matrix(NA,nCaptSims,t),
                    "JS" = matrix(NA,nCaptSims,t))
   estMSE   <- list("CR" = rep(NA,nCaptSims),
@@ -74,21 +73,19 @@ testOpenSim  <- function() {
     
   }
   
+  estNmean[["Actual"]]  <- actN
   estNmean[["CR"]] <- apply(estN[["CR"]],2,mean)
   estNmean[["JS"]] <- apply(estN[["JS"]],2,mean)
   
   #estBias <- how do I calculate bias here?
   
   
-  #par(mfrow=c(1,1))
-  yMin <- min(unlist(estNmean), actN, na.rm=T)
-  yMax <- max(unlist(estNmean), actN, na.rm=T)
-  plot(estNmean[["CR"]], type="p", col="red", 
-       ylim=c(yMin,yMax))
-  points(actN, col="blue")
-  points(estNmean[["JS"]], col="green")
-  legend("bottomright",legend=c("CR estimate", "JS estimate", "Actual population"),
-         pch=c(1,1,1),col=c("red","green","blue"),cex=0.5)
+  estN.df <- as.data.frame(estNmean)
+  estN.df$Period <- c(1:t)
+  estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
+  
+  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundity estimates of simulated population")
+      
 }
 
 

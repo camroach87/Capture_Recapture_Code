@@ -85,7 +85,7 @@ testOpenSim  <- function() {
   estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
   estN.tidy$Method <- factor(estN.tidy$Method, levels=c("Actual","CR","JS"))
   
-  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundity estimates of simulated open population")
+  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundance estimates of simulated open population")
       
 }
 
@@ -127,6 +127,9 @@ testTroutCod <- function() {
   #   }
   #   mtrxRecaptY <- mtrxRecaptY - 1
   
+  
+  
+  
   # Jolly Seber population estimates
   N_Y <- calcJS(mtrxCaptY)
   N_Y.df <- as.data.frame(N_Y)
@@ -152,14 +155,38 @@ testTroutCod <- function() {
   
   # Plots
   tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
-  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundity for yearly grouping of TC capture data.")
+  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundance for yearly grouping of TC capture data.")
   tmp <- estN.tidy[estN.tidy$Method=="JS on daily grouped data",]
-  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundity for daily grouping of TC capture data.")
-  ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("Comparison of JS estimate of abundity for daily and yearly grouping of TC capture data.")
-    
-    
+  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundance for daily grouping of TC capture data.")
+  ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.")
+  rm(tmp)
   
-  # apply Chao's sparse data estimator
-  N_ChaoY <- calcChaoMt(mtrxCaptY)
-  N_ChaoD <- calcChaoMt(mtrxCaptD)
+  
+  #   # Chao's sparse data estimator for closed populations
+  #   N_ChaoY <- calcChaoMt(mtrxCaptY)
+  #   N_ChaoD <- calcChaoMt(mtrxCaptD)
+  
+  # Get dates and occasion from N_D.df. Bit hacky...
+  dates.df <- N_D.df[,c("Date","Occasion")]
+  
+  # Apply CR estimator to daily trout cod data
+  # Investigate impact of different window sizes
+  estN.CR <- data.frame()
+  CR.levels <- NULL
+  for (iW in seq(10,100,10)) {
+    cat("Calculating CR abundance estimate for window size",iW,"...\n")
+    tmp <- CR_RobustDesign(mtrxCaptD, iW)
+    tmp <- as.data.frame(tmp)
+    tmp$Occasion <- c(1:(dim(tmp)[1]))
+    tmp <- merge(tmp, dates.df)
+    tmp$Method <- paste("CR window size",iW)
+    colnames(tmp)[2] <- "N"
+    estN.CR <- rbind(estN.CR,tmp)
+    CR.levels <- rbind(CR.levels,paste("CR window size",iW))
+  }
+  
+  # Plot window size impact for CR estimate of TC population
+  estN.CR$Method <- factor(estN.CR$Method, levels=CR.levels)
+  ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("CR estimates of abundance for TC capture data.")
+  
 }

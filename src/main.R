@@ -187,6 +187,6 @@ testTroutCod <- function() {
   
   # Plot window size impact for CR estimate of TC population
   estN.CR$Method <- factor(estN.CR$Method, levels=CR.levels)
-  ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("CR estimates of abundance for TC capture data.")
+  ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_point() + ggtitle("CR estimates of abundance for TC capture data.")
   
 }

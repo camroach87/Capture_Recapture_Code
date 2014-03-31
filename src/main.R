@@ -79,12 +79,13 @@ testOpenSim  <- function() {
   
   #estBias <- how do I calculate bias here?
   
-  
+  # Munge data and then plot
   estN.df <- as.data.frame(estNmean)
   estN.df$Period <- c(1:t)
   estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
+  estN.tidy$Method <- factor(estN.tidy$Method, levels=c("Actual","CR","JS"))
   
-  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundity estimates of simulated population")
+  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundity estimates of simulated open population")
       
 }
 

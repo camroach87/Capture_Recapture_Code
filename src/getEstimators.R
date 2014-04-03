@@ -50,11 +50,7 @@ CR_RobustDesign <- function(mtrxCapt, window) {
   # Kernel smoothing
   sChao <- ksmooth(1:T,aChao_endfix[,1],bandwidth=window,x.points=1:T)
   sChao <- sChao[[2]]
-  
-  # Calculate variance
-  # to do
-  
-  
+    
   return(sChao)
 }
 

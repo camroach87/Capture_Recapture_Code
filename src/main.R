@@ -31,6 +31,7 @@ testOpenSim  <- function() {
   # Open population sim
   
   # Initialise parameters
+  set.seed(1234)
   N.0   <- 5000
   t     <- 20
   p     <- 0.02

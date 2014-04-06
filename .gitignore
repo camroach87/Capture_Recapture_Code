@@ -1,7 +1,7 @@
-*.RData
 *.Rhistory
 *.pper
 *.Rproj
 .Rproj.user/
 output/popCheck.csv
 output/mtrxCaptY.csv
+.RData

@@ -53,7 +53,7 @@ testOpenSim  <- function() {
                    "JS" = rep(NA,nCaptSims))
   estVar   <- list("CR" = rep(NA,nCaptSims),
                    "JS" = rep(NA,nCaptSims))
-  estNmean <- list("CR" = rep(NA,t),
+  estN.mean <- list("CR" = rep(NA,t),
                    "JS" = rep(NA,t))
   estN.bs.se <- matrix(NA,nCaptSims,t)
   
@@ -94,9 +94,9 @@ testOpenSim  <- function() {
   }
   
   # calculate means from repeated simulations
-  estNmean[["Actual"]]  <- actN
-  estNmean[["CR"]] <- apply(estN[["CR"]],2,mean)
-  estNmean[["JS"]] <- apply(estN[["JS"]],2,mean)
+  estN.mean[["Actual"]]  <- actN
+  estN.mean[["CR"]] <- apply(estN[["CR"]],2,mean)
+  estN.mean[["JS"]] <- apply(estN[["JS"]],2,mean)
   
   # Effectively, these bootstrapped se values have been averaged across many
   # different capture matrices.
@@ -106,7 +106,7 @@ testOpenSim  <- function() {
   #estBias <- how do I calculate bias here?
   
   # Munge data and then plot
-  estN.df <- as.data.frame(estNmean)
+  estN.df <- as.data.frame(estN.mean)
   estN.df$Period <- c(1:t)
   estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
   estN.tidy$Method <- factor(estN.tidy$Method, levels=c("Actual","CR","JS"))

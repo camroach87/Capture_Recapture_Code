@@ -29,7 +29,7 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 testOpenSim  <- function() {
   # Open population sim
-  timer1 <- Sys.time()
+  #timer1 <- Sys.time()
   
   # Initialise parameters
   set.seed(1234)
@@ -55,7 +55,7 @@ testOpenSim  <- function() {
   estVar   <- list("CR" = rep(NA,nCaptSims),
                    "JS" = rep(NA,nCaptSims))
   estN.mean <- list("CR" = rep(NA,t),
-                   "JS" = rep(NA,t))
+                    "JS" = rep(NA,t))
   estN.bs.se <- matrix(NA,nCaptSims,t)
   
   
@@ -70,12 +70,12 @@ testOpenSim  <- function() {
     estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window)
     estN[["JS"]][iS,] <- calcJS(mtrxCapt)
     
-#     # we are ignoring the effects of correlation on MSE and Var - needs further investigation
-#     estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
-#     estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
-#     
-#     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
-#     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
+    #     # we are ignoring the effects of correlation on MSE and Var - needs further investigation
+    #     estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
+    #     estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
+    #     
+    #     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
+    #     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
     # Get bootstrap samples
     nB <- 999
@@ -90,14 +90,14 @@ testOpenSim  <- function() {
     estN.bs.mean <- apply(estN.bs,2,mean)
     tmp <- NULL
     for (iB in 1:nB) {
-       tmp <- rbind(tmp,(estN.bs.mean-estN.bs[iB,])^2)
+      tmp <- rbind(tmp,(estN.bs.mean-estN.bs[iB,])^2)
     }
     estN.bs.se[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
     
   }
-
-  timer2 <- Sys.time()
-  print(difftime(timer2,timer1,units="mins"))
+  
+  #timer2 <- Sys.time()
+  #print(difftime(timer2,timer1,units="mins"))
   
   # calculate means from repeated simulations
   estN.mean[["Actual"]]  <- actN
@@ -112,13 +112,29 @@ testOpenSim  <- function() {
   # Calculate actual s.e. and mse
   estN.CR.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["CR"]],1,"-",estN.mean[["CR"]]))^2,2,sum))
   estN.JS.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["JS"]],1,"-",estN.mean[["JS"]]))^2,2,sum))
-
+  
   estN.CR.mse  <- 1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",actN))^2,2,sum)
   estN.JS.mse  <- 1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",actN))^2,2,sum)
-
   
-
-
+  # Convert to dataframe
+  tmp1 <- data.frame("Method" = "CR",
+                     "Period" = 1:t,
+                     "se" = estN.CR.se,
+                     "se.bs" = estN.bs.se.mean,
+                     "mse" = estN.CR.mse)
+  tmp2 <- data.frame("Method" = "JS",
+                     "Period" = 1:t,
+                     "se" = estN.JS.se,
+                     "se.bs" = NA,
+                     "mse" = estN.JS.mse)
+  
+  error.df <- rbind(tmp1,tmp2)
+  rm(list=ls(pattern="tmp"))
+  
+  # calculate 95% CI
+  error.df$ci.95 <- 1.96*error.df$se/sqrt(nCaptSims)
+  error.df$ci.bs.95 <- 1.96*error.df$se.bs/sqrt(nCaptSims)
+  
   #estBias <- how do I calculate bias here?
   
   # Munge data and then plot
@@ -127,8 +143,36 @@ testOpenSim  <- function() {
   estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
   estN.tidy$Method <- factor(estN.tidy$Method, levels=c("Actual","CR","JS"))
   
-  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) + geom_line() + ggtitle("Abundance estimates of simulated open population")
-      
+  #add errors to N estimates
+  estN.tidy <- merge(estN.tidy,error.df,by=c("Method","Period"),all.x=TRUE)
+  
+  # plots
+  pd <- position_dodge(0.1)
+  
+  # plot of bootstrapped confidence intervals for CR
+  ggplot(estN.tidy[estN.tidy$Method!="JS",], aes(x=Period, y=N, colour=Method)) + 
+    geom_errorbar(aes(ymin=N-ci.bs.95, ymax=N+ci.bs.95), width=.5, alpha=0.4) +
+    geom_line() + 
+    geom_point(size=3,shape=21,fill="white") +
+    ggtitle("Abundance estimates of simulated open population") +
+    theme_bw()
+  
+  # plot of actual confidence intervals for CR
+  ggplot(estN.tidy[estN.tidy$Method!="JS",], aes(x=Period, y=N, colour=Method)) + 
+    geom_errorbar(aes(ymin=N-ci.95, ymax=N+ci.95), width=.5, alpha=0.4) +
+    geom_line() + 
+    geom_point(size=3,shape=21,fill="white") +
+    ggtitle("Abundance estimates of simulated open population") +
+    theme_bw()
+  
+  # Plot of JS and CR with CIs
+  ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) +
+    geom_errorbar(aes(ymin=N-ci.95, ymax=N+ci.95), position=pd, width=.5, alpha=0.4) +
+    geom_line() + 
+    geom_point(position=pd, size=3,shape=21,fill="white") +
+    ggtitle("Abundance estimates of simulated open population") +
+    theme_bw()
+  
 }
 
 

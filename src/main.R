@@ -110,8 +110,8 @@ testOpenSim  <- function() {
   
   
   # Calculate actual s.e. and mse
-  estN.CR.se  <- sqrt(1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",estN.mean[["CR"]]))^2,2,sum))
-  estN.JS.se  <- sqrt(1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",estN.mean[["JS"]]))^2,2,sum))
+  estN.CR.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["CR"]],1,"-",estN.mean[["CR"]]))^2,2,sum))
+  estN.JS.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["JS"]],1,"-",estN.mean[["JS"]]))^2,2,sum))
 
   estN.CR.mse  <- 1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",actN))^2,2,sum)
   estN.JS.mse  <- 1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",actN))^2,2,sum)

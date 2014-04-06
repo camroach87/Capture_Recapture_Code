@@ -35,6 +35,7 @@ testOpenSim  <- function() {
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
+  window <- 4
   
   
   # simulate population matrix
@@ -53,7 +54,7 @@ testOpenSim  <- function() {
                    "JS" = rep(NA,nCaptSims))
   estNmean <- list("CR" = rep(NA,t),
                    "JS" = rep(NA,t))
-  
+  estN.bs.se <- matrix(NA,nCaptSims,t)
   
   
   
@@ -62,20 +63,44 @@ testOpenSim  <- function() {
     mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
     
     # Calculate estimators
-    estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,4)
+    estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window)
     estN[["JS"]][iS,] <- calcJS(mtrxCapt)
     
+    # we are ignoring the effects of correlation on MSE and Var - needs further investigation
     estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
     estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
     
     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
+    # Get bootstrap samples
+    nB <- 999
+    estN.bs <- matrix(NA,nB,t)
+    for (iB in 1:nB) {
+      idx <- sample(nrow(mtrxCapt),nrow(mtrxCapt),replace=TRUE)
+      mtrxCapt.bs <- mtrxCapt[idx,]
+      estN.bs[iB,] <- CR_RobustDesign(mtrxCapt.bs,window)
+    }
+    
+    # Calculate bootstrap estimates (first step)
+    estN.bs.mean <- apply(estN.bs,2,mean)
+    tmp <- NULL
+    for (iB in 1:nB) {
+       tmp <- rbind(tmp,(estN.bs.mean-estN.bs[iB,])^2)
+    }
+    estN.bs.se[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
+    
   }
   
+  # calculate means from repeated simulations
   estNmean[["Actual"]]  <- actN
   estNmean[["CR"]] <- apply(estN[["CR"]],2,mean)
   estNmean[["JS"]] <- apply(estN[["JS"]],2,mean)
+  
+  # Effectively, these bootstrapped se values have been averaged across many
+  # different capture matrices.
+  estN.bs.se.mean <- apply(estN.bs.se,2,mean)
+  
   
   #estBias <- how do I calculate bias here?
   

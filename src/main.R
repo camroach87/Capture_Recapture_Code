@@ -67,12 +67,12 @@ testOpenSim  <- function() {
     estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window)
     estN[["JS"]][iS,] <- calcJS(mtrxCapt)
     
-    # we are ignoring the effects of correlation on MSE and Var - needs further investigation
-    estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
-    estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
-    
-    estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
-    estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
+#     # we are ignoring the effects of correlation on MSE and Var - needs further investigation
+#     estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
+#     estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
+#     
+#     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
+#     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
     # Get bootstrap samples
     nB <- 999
@@ -103,6 +103,16 @@ testOpenSim  <- function() {
   estN.bs.se.mean <- apply(estN.bs.se,2,mean)
   
   
+  # Calculate actual s.e. and mse
+  estN.CR.se  <- sqrt(1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",estN.mean[["CR"]]))^2,2,sum))
+  estN.JS.se  <- sqrt(1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",estN.mean[["JS"]]))^2,2,sum))
+
+  estN.CR.mse  <- 1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",actN))^2,2,sum)
+  estN.JS.mse  <- 1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",actN))^2,2,sum)
+
+  
+
+
   #estBias <- how do I calculate bias here?
   
   # Munge data and then plot

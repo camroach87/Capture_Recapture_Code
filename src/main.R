@@ -29,6 +29,7 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 testOpenSim  <- function() {
   # Open population sim
+  timer1 <- Sys.time()
   
   # Initialise parameters
   set.seed(1234)
@@ -60,6 +61,8 @@ testOpenSim  <- function() {
   
   
   for (iS in 1:nCaptSims) {
+    cat("Running capture simulation",iS,"of",nCaptSims,"...\n")
+    
     #simulate a different capture matrix on each loop
     mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
     
@@ -92,6 +95,9 @@ testOpenSim  <- function() {
     estN.bs.se[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
     
   }
+
+  timer2 <- Sys.time()
+  print(difftime(timer2,timer1,units="mins"))
   
   # calculate means from repeated simulations
   estN.mean[["Actual"]]  <- actN

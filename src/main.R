@@ -246,10 +246,23 @@ testTroutCod <- function() {
   
   # Plots
   tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
-  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundance for yearly grouping of TC capture data.")
+  plot1 <- ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + 
+    ggtitle("JS estimate of abundance for yearly grouping of TC capture data.") +
+    theme_bw()
+  
   tmp <- estN.tidy[estN.tidy$Method=="JS on daily grouped data",]
-  ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("JS estimate of abundance for daily grouping of TC capture data.")
-  ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.")
+  plot2 <- ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + 
+    ggtitle("JS estimate of abundance for daily grouping of TC capture data.") +
+    theme_bw()
+  
+  plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + 
+    ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.") +
+    theme_bw()
+  
+  print(plot1)
+  print(plot2)
+  print(plot3)
+  
   rm(tmp)
   
   
@@ -278,6 +291,8 @@ testTroutCod <- function() {
   
   # Plot window size impact for CR estimate of TC population
   estN.CR$Method <- factor(estN.CR$Method, levels=CR.levels)
-  ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_point() + ggtitle("CR estimates of abundance for TC capture data.")
-  
+  plot1 <- ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_point() + 
+    ggtitle("CR estimates of abundance for TC capture data.") +
+    theme_bw()
+  print(plot1)
 }

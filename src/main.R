@@ -207,7 +207,7 @@ testTroutCod <- function() {
   # table of f_i
   cat("Table of f_i...")
   print(table(cbind(apply(mtrxCaptY,1,sum))))
-  
+  cat("\n")
   
   
   

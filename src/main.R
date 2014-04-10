@@ -271,7 +271,15 @@ testTroutCod <- function() {
   #   N_ChaoD <- calcChaoMt(mtrxCaptD)
   
   # Get dates and occasion from N_D.df. Bit hacky...
-  dates.df <- N_D.df[,c("Date","Occasion")]
+  dates.occ <- N_D.df[,c("Date","Occasion")]
+  #dates.diff <- max(dates.occ$Date)-min(dates.occ$Date)+1
+  #dates.all <- min(dates.occ$Date) + days(0:dates.diff)
+  #dates.all <- data.frame("Date" = dates.all)
+  #dates.all <- merge(dates.all,dates.occ,all.x=TRUE)
+  
+  
+  
+  
   
   # Apply CR estimator to daily trout cod data
   # Investigate impact of different window sizes
@@ -282,7 +290,7 @@ testTroutCod <- function() {
     tmp <- CR_RobustDesign(mtrxCaptD, iW)
     tmp <- as.data.frame(tmp)
     tmp$Occasion <- c(1:(dim(tmp)[1]))
-    tmp <- merge(tmp, dates.df)
+    tmp <- merge(tmp, dates.occ)
     tmp$Method <- paste("CR window size",iW)
     colnames(tmp)[2] <- "N"
     estN.CR <- rbind(estN.CR,tmp)
@@ -291,7 +299,7 @@ testTroutCod <- function() {
   
   # Plot window size impact for CR estimate of TC population
   estN.CR$Method <- factor(estN.CR$Method, levels=CR.levels)
-  plot1 <- ggplot(estN.CR, aes(x=Date, y=N, colour=Method)) + geom_point() + 
+  plot1 <- ggplot(estN.CR, aes(x=Occasion, y=N, colour=Method)) + geom_line() + 
     ggtitle("CR estimates of abundance for TC capture data.") +
     theme_bw()
   print(plot1)

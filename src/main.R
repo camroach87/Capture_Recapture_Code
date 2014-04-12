@@ -29,7 +29,7 @@ source(file.path(srcDir,"getEstimators.R"))   # estimator functions
 
 testOpenSim  <- function() {
   # Open population sim
-  #timer1 <- Sys.time()
+  timer1 <- Sys.time()
   
   # Initialise parameters
   set.seed(1234)
@@ -37,7 +37,7 @@ testOpenSim  <- function() {
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
-  window <- 4
+  window <- 6
   
   
   # simulate population matrix
@@ -96,8 +96,10 @@ testOpenSim  <- function() {
     
   }
   
-  #timer2 <- Sys.time()
-  #print(difftime(timer2,timer1,units="mins"))
+  timer2 <- Sys.time()
+  print(difftime(timer2,timer1,units="mins"))
+  fId <- file.path(outputDir,paste0("afterSimLoop_seed_1234_window_",window,".RData"))
+  save.image(file = fId)
   
   # calculate means from repeated simulations
   estN.mean[["Actual"]]  <- actN

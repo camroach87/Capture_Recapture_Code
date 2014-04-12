@@ -96,6 +96,7 @@ testOpenSim  <- function() {
     
   }
   
+  # time loop and save workspace
   timer2 <- Sys.time()
   print(difftime(timer2,timer1,units="mins"))
   fId <- file.path(outputDir,paste0("afterSimLoop_seed_1234_window_",window,".RData"))

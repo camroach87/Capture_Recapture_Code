@@ -37,7 +37,7 @@ testOpenSim  <- function() {
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
-  window <- 6
+  window <- 8
   
   
   # simulate population matrix
@@ -56,7 +56,7 @@ testOpenSim  <- function() {
                    "JS" = rep(NA,nCaptSims))
   estN.mean <- list("CR" = rep(NA,t),
                     "JS" = rep(NA,t))
-  estN.bs.se <- matrix(NA,nCaptSims,t)
+  estN.bs.sd <- matrix(NA,nCaptSims,t)
   
   
   
@@ -92,11 +92,11 @@ testOpenSim  <- function() {
     for (iB in 1:nB) {
       tmp <- rbind(tmp,(estN.bs.mean-estN.bs[iB,])^2)
     }
-    estN.bs.se[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
+    estN.bs.sd[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
     
   }
   
-  # time loop and save workspace
+  # Calculate loop time and save workspace
   timer2 <- Sys.time()
   print(difftime(timer2,timer1,units="mins"))
   fId <- file.path(outputDir,paste0("afterSimLoop_seed_1234_window_",window,".RData"))
@@ -109,34 +109,35 @@ testOpenSim  <- function() {
   
   # Effectively, these bootstrapped se values have been averaged across many
   # different capture matrices.
-  estN.bs.se.mean <- apply(estN.bs.se,2,mean)
+  estN.bs.sd.mean <- apply(estN.bs.sd,2,mean)
   
   
-  # Calculate actual s.e. and mse
-  estN.CR.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["CR"]],1,"-",estN.mean[["CR"]]))^2,2,sum))
-  estN.JS.se  <- sqrt(1/(nCaptSims-1)*apply(t(apply(estN[["JS"]],1,"-",estN.mean[["JS"]]))^2,2,sum))
+  # Calculate actual sd and mse
+  estN.CR.sd  <- apply(estN[["CR"]],2,sd)
+  estN.JS.sd  <- apply(estN[["JS"]],2,sd)
   
-  estN.CR.mse  <- 1/nCaptSims*apply(t(apply(estN[["CR"]],1,"-",actN))^2,2,sum)
-  estN.JS.mse  <- 1/nCaptSims*apply(t(apply(estN[["JS"]],1,"-",actN))^2,2,sum)
+  estN.CR.mse  <- sapply(1:t, function(i) mse.f(estN[["CR"]][,i], actN[i]))
+  estN.JS.mse  <- sapply(1:t, function(i) mse.f(estN[["JS"]][,i], actN[i]))
   
   # Convert to dataframe
   tmp1 <- data.frame("Method" = "CR",
                      "Period" = 1:t,
-                     "se" = estN.CR.se,
-                     "se.bs" = estN.bs.se.mean,
+                     "sd" = estN.CR.sd,
+                     "sd.bs" = estN.bs.sd.mean,
                      "mse" = estN.CR.mse)
   tmp2 <- data.frame("Method" = "JS",
                      "Period" = 1:t,
-                     "se" = estN.JS.se,
-                     "se.bs" = NA,
+                     "sd" = estN.JS.sd,
+                     "sd.bs" = NA,
                      "mse" = estN.JS.mse)
   
   error.df <- rbind(tmp1,tmp2)
   rm(list=ls(pattern="tmp"))
   
-  # calculate 95% CI
-  error.df$ci.95 <- 1.96*error.df$se/sqrt(nCaptSims)
-  error.df$ci.bs.95 <- 1.96*error.df$se.bs/sqrt(nCaptSims)
+  # calculate two sided 95% CI
+  signif <- 0.05
+  error.df$ci.95 <- qnorm(1-signif/2)*error.df$sd/sqrt(nCaptSims)
+  error.df$ci.bs.95 <- qnorm(1-signif/2)*error.df$sd.bs/sqrt(nCaptSims)
   
   #estBias <- how do I calculate bias here?
   
@@ -306,4 +307,9 @@ testTroutCod <- function() {
     ggtitle("CR estimates of abundance for TC capture data.") +
     theme_bw()
   print(plot1)
+}
+
+
+mse.f <- function(x, x.act) {
+  sum((x - x.act) ^ 2) / length(x)
 }

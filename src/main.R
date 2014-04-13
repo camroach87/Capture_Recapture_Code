@@ -313,7 +313,13 @@ testTroutCod <- function() {
   plot1 <- ggplot(estN.CR, aes(x=Occasion, y=N, colour=Method)) + geom_line() + 
     ggtitle("CR estimates of abundance for TC capture data.") +
     theme_bw()
+  tmp <- estN.CR[estN.CR$Method=="CR window size 20",]
+  plot2 <- ggplot(tmp, aes(x=Occasion, y=N, colour=Method)) + geom_line() + 
+    ggtitle("CR estimates of abundance for TC capture data.") +
+    theme_bw()
+  
   print(plot1)
+  print(plot2)
 }
 
 

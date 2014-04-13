@@ -252,22 +252,29 @@ testTroutCod <- function() {
   tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
   plot1 <- ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + 
     ggtitle("JS estimate of abundance for yearly grouping of TC capture data.") +
-    theme_bw()
+    theme_bw() +
+    theme(legend.position="bottom")
   
   tmp <- estN.tidy[estN.tidy$Method=="JS on daily grouped data",]
   plot2 <- ggplot(tmp, aes(x=Date, y=N, colour=Method)) + geom_line() + 
     ggtitle("JS estimate of abundance for daily grouping of TC capture data.") +
-    theme_bw()
+    theme_bw() +
+    theme(legend.position="bottom")
   
   plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() + 
     ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.") +
-    theme_bw()
+    theme_bw() +
+    theme(legend.position="bottom")
   
   print(plot1)
   print(plot2)
   print(plot3)
-  
+  ggsave(plot1,file=file.path(outputDir,"plots/TC_JS_y.png"),width=14,height=8)
+  ggsave(plot2,file=file.path(outputDir,"plots/TC_JS_d.png"),width=14,height=8)
+  ggsave(plot3,file=file.path(outputDir,"plots/TC_JS_y_d.png"),width=14,height=8)
   rm(tmp)
+  
+  
   
   
   #   # Chao's sparse data estimator for closed populations

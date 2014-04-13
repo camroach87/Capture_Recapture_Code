@@ -310,6 +310,3 @@ testTroutCod <- function() {
 }
 
 
-mse.f <- function(x, x.act) {
-  sum((x - x.act) ^ 2) / length(x)
-}

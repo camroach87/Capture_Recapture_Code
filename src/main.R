@@ -135,9 +135,9 @@ testOpenSim  <- function() {
   rm(list=ls(pattern="tmp"))
   
   # calculate two sided 95% CI
-  signif <- 0.05
-  error.df$ci.95 <- qnorm(1-signif/2)*error.df$sd/sqrt(nCaptSims)
-  error.df$ci.bs.95 <- qnorm(1-signif/2)*error.df$sd.bs/sqrt(nCaptSims)
+  z.val <- qnorm(1-.05/2)
+  error.df$ci.95 <- z.val*error.df$sd/sqrt(nCaptSims)
+  error.df$ci.bs.95 <- z.val*error.df$sd.bs/sqrt(nCaptSims)
   
   #estBias <- how do I calculate bias here?
   

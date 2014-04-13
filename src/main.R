@@ -158,7 +158,7 @@ testOpenSim  <- function() {
     geom_errorbar(aes(ymin=N-ci.bs.95, ymax=N+ci.bs.95), width=.5, alpha=0.4) +
     geom_line() + 
     geom_point(size=3,shape=21,fill="white") +
-    ggtitle("Abundance estimates of simulated open population") +
+    ggtitle("Abundance estimates of simulated open population. Bootstrap CI.") +
     theme_bw()
   
   # plot of actual confidence intervals for CR
@@ -166,7 +166,7 @@ testOpenSim  <- function() {
     geom_errorbar(aes(ymin=N-ci.95, ymax=N+ci.95), width=.5, alpha=0.4) +
     geom_line() + 
     geom_point(size=3,shape=21,fill="white") +
-    ggtitle("Abundance estimates of simulated open population") +
+    ggtitle("Abundance estimates of simulated open population. Actual CI") +
     theme_bw()
   
   # Plot of JS and CR with CIs

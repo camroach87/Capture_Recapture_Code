@@ -56,6 +56,12 @@ CR_RobustDesign <- function(mtrxCapt, window) {
 }
 
 
+CR.bs <- function(mtrxCapt, window, indices) {
+  mtrxCapt <- mtrxCapt[indices,]
+  N.bs <- CR_RobustDesign(mtrxCapt, window)
+  return(N.bs)
+}
+
 
 calcChaoMt <- function(mtrxCapt) {
   # DESCRIPTION: Chao's sparse data estimator for closed populations

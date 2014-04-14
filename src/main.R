@@ -37,7 +37,7 @@ testOpenSim  <- function() {
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
-  window <- 8
+  window.val <- 4
   
   
   # simulate population matrix
@@ -56,7 +56,8 @@ testOpenSim  <- function() {
                    "JS" = rep(NA,nCaptSims))
   estN.mean <- list("CR" = rep(NA,t),
                     "JS" = rep(NA,t))
-  estN.bs.sd <- matrix(NA,nCaptSims,t)
+  estN.bs <- NULL
+  estN.bs.ci <- NULL
   
   
   
@@ -67,7 +68,7 @@ testOpenSim  <- function() {
     mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
     
     # Calculate estimators
-    estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window)
+    estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window.val)
     estN[["JS"]][iS,] <- calcJS(mtrxCapt)
     
     #     # we are ignoring the effects of correlation on MSE and Var - needs further investigation
@@ -77,47 +78,46 @@ testOpenSim  <- function() {
     #     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
     #     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
-    # Get bootstrap samples
+    # Get bootstrap estimates
     nB <- 999
-    estN.bs <- matrix(NA,nB,t)
-    for (iB in 1:nB) {
-      idx <- sample(nrow(mtrxCapt),nrow(mtrxCapt),replace=TRUE)
-      mtrxCapt.bs <- mtrxCapt[idx,]
-      estN.bs[iB,] <- CR_RobustDesign(mtrxCapt.bs,window)
-    }
-    
-    # Calculate bootstrap estimates (first step)
-    estN.bs.mean <- apply(estN.bs,2,mean)
-    tmp <- NULL
-    for (iB in 1:nB) {
-      tmp <- rbind(tmp,(estN.bs.mean-estN.bs[iB,])^2)
-    }
-    estN.bs.sd[iS,] <- sqrt(1/(nB-1)*apply(tmp,2,sum))
+    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,window=window.val)
     
   }
   
   # Calculate loop time and save workspace
   timer2 <- Sys.time()
   print(difftime(timer2,timer1,units="mins"))
-  fId <- file.path(outputDir,paste0("afterSimLoop_seed_1234_window_",window,".RData"))
+  fId <- file.path(outputDir,paste0("afterSimLoop_seed_1234_window_",window.val,".RData"))
   save.image(file = fId)
+  
+  
+  
+  # Bootstrap checks. Remember: index is the variable of interest, i.e. the 
+  # sampling occasion number. Interesting to look at edges vs middle.
+  boot.ci(estN.bs[[iS]], type=c("norm","basic", "perc"), index=10)
+  plot(estN.bs[[iS]], index=1) 
+  
+  # check if evidence to support normal
+  shapiro.test(estN.bs[[iS]]$t[,10])
+  
+  # Average bootstrap confidence intervals for different capture matrices
+  # TO DO - only calculating for first capture sim atm... just need to loop over all and average.
+  # estN.bs.sd.mean <- sqrt(apply(estN.bs[[1]]$t,2,var))
+  
+    
   
   # calculate means from repeated simulations
   estN.mean[["Actual"]]  <- actN
   estN.mean[["CR"]] <- apply(estN[["CR"]],2,mean)
   estN.mean[["JS"]] <- apply(estN[["JS"]],2,mean)
   
-  # Effectively, these bootstrapped se values have been averaged across many
-  # different capture matrices.
-  estN.bs.sd.mean <- apply(estN.bs.sd,2,mean)
-  
-  
   # Calculate actual sd and mse
   estN.CR.sd  <- apply(estN[["CR"]],2,sd)
   estN.JS.sd  <- apply(estN[["JS"]],2,sd)
-  
   estN.CR.mse  <- sapply(1:t, function(i) mse.f(estN[["CR"]][,i], actN[i]))
   estN.JS.mse  <- sapply(1:t, function(i) mse.f(estN[["JS"]][,i], actN[i]))
+  
+  
   
   # Convert to dataframe
   tmp1 <- data.frame("Method" = "CR",

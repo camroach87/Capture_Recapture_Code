@@ -81,12 +81,6 @@ testOpenSim  <- function() {
     estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window.val)
     estN[["JS"]][iS,] <- calcJS(mtrxCapt)
     
-    #     # we are ignoring the effects of correlation on MSE and Var - needs further investigation
-    #     estMSE[["CR"]][iS] <- sum((estN[["CR"]][iS,]-actN)^2)/t
-    #     estMSE[["JS"]][iS] <- sum((estN[["JS"]][iS,]-actN)^2)/t
-    #     
-    #     estVar[["CR"]][iS] <- sum((estN[["CR"]][iS,]-mean(estN[["CR"]][iS,]))^2)/t # pretty sure it is /t and not /(t-1) since we are looking at population variance, not sample variance (all t included)
-    #     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
     # Get bootstrap estimates
     nB <- 5000
@@ -99,6 +93,7 @@ testOpenSim  <- function() {
     }
     
   }
+  
   
   # Calculate loop time and save workspace
   timer2 <- Sys.time()

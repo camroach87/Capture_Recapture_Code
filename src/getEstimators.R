@@ -14,16 +14,20 @@
 
 CR_RobustDesign <- function(mtrxCapt, window) {
   # DESCRIPTION: Estimates population by splitting sampling timeline into 
-  # overlapping sections that are assumed to be closed. Calculate population in
+  # overlapping periods that are assumed to be closed. Calculate population in
   # each of these windows using closed methods.
   #
-  #
-  # 2*window+1 should be the number of sampling occasions in a row where each
-  # animal is only captured at most twice starting from any time. If we take x0
-  # as the centre of the window, we take "window" number of values left of x0
-  # and "window" number of values right of x0. Bit crappy towards end points,
-  # use duplicate values of end points so that we can get "window" number of
+  #   
+  # 2*window+1 is the period we assume the population is closed. 2*window+1
+  # should be the number of sampling occasions in a row where each animal is
+  # only captured at most twice starting from any time. If we take x0 as the
+  # centre of the window, we take "window" number of values left of x0 and
+  # "window" number of values right of x0. Bit crappy towards end points, use
+  # duplicate values of end points so that we can get "window" number of 
   # values.
+  #
+  # Use direct plug-in method, dpill(), to calculate bandwidth for kernel
+  # regression.
   
   
   T <- ncol(mtrxCapt)
@@ -48,11 +52,11 @@ CR_RobustDesign <- function(mtrxCapt, window) {
   aChao_endfix[(window+1):(T-window),] <- aChao[,]
   aChao_endfix[(T-window+1):T,] <- t(matrix(aChao[dim(aChao)[1],],2,window))
   # Kernel smoothing
-  sChao <- ksmooth(1:T,aChao_endfix[,1],kernel="normal",
-                   bandwidth=window,x.points=1:T)
-  sChao <- sChao[[2]]
-    
-  return(sChao)
+  h <- dpill(1:T,aChao_endfix[,1])
+  sChao <- locpoly(1:T,aChao_endfix[,1], bandwidth=h, gridsize=T)
+  
+  
+  return(sChao$y)
 }
 
 

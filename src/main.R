@@ -11,6 +11,7 @@ require(ggplot2)
 require(plyr)
 require(reshape2)
 require(boot)
+require(KernSmooth)
 
 
 #### Set directories ####

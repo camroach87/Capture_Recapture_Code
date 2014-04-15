@@ -12,6 +12,8 @@ require(plyr)
 require(reshape2)
 require(boot)
 require(KernSmooth)
+require(multicore)
+require(snow)
 
 
 #### Set directories ####
@@ -82,7 +84,13 @@ testOpenSim  <- function() {
     
     # Get bootstrap estimates
     nB <- 5000
-    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="snow",window=window.val)
+    if (.Platform$OS.type == "windows") {
+      # For windows use snow. Need to work out clustering to use more than one cpu - to do.
+      estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="snow",ncpus=1,window=window.val)
+    } else if (.Platform$OS.type == "unix") {
+      # For linux use multicore. Don't need to worry about cluster stuff.
+      estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="multicore",ncpus=3,window=window.val)
+    }
     
   }
   

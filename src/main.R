@@ -12,8 +12,14 @@ require(plyr)
 require(reshape2)
 require(boot)
 require(KernSmooth)
-require(multicore)
-require(snow)
+
+if (.Platform$OS.type == "windows") {
+  require(snow)
+} else if (.Platform$OS.type == "unix") {
+  require(multicore)
+}
+
+
 
 
 #### Set directories ####

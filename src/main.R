@@ -10,6 +10,7 @@ require(lubridate)
 require(ggplot2)
 require(plyr)
 require(reshape2)
+require(boot)
 
 
 #### Set directories ####
@@ -37,7 +38,7 @@ testOpenSim  <- function() {
   t     <- 20
   p     <- 0.02
   beta  <- 0.003
-  window.val <- 4
+  window.val <- 8
   
   
   # simulate population matrix
@@ -79,8 +80,8 @@ testOpenSim  <- function() {
     #     estVar[["JS"]][iS] <- sum((estN[["JS"]][iS,]-mean(estN[["JS"]][iS,]))^2)/t
     
     # Get bootstrap estimates
-    nB <- 999
-    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,window=window.val)
+    nB <- 2000
+    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="snow",window=window.val)
     
   }
   

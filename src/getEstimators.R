@@ -67,7 +67,7 @@ CR.bs <- function(mtrxCapt, window, indices) {
 }
 
 
-calcChaoMt <- function(mtrxCapt) {
+calcChaoMt <- function(mtrxCapt, bc=TRUE) {
   # DESCRIPTION: Chao's sparse data estimator for closed populations
   
   fVector <- cbind(apply(mtrxCapt,1,sum))
@@ -82,8 +82,12 @@ calcChaoMt <- function(mtrxCapt) {
   Z <- mtrxCapt[fVector==1,]
   Z <- colSums(Z)
   
+  if (bc==TRUE) {
+    N_Chao = S + (f1^2-sum(Z^2))/(2*(f2+1))
+  } else {
+    N_Chao = S + (f1^2-sum(Z^2))/(2*f2)
+  }
   
-  N_Chao = S + (f1^2-sum(Z^2))/(2*f2)
   
   output <- list(N_Chao, S)
   

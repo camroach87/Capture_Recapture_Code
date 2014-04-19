@@ -78,9 +78,9 @@ plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, colour=Method)) + geom_line() +
 print(plot1)
 print(plot2)
 print(plot3)
-ggsave(plot1,file=file.path(plotDir,"plots/TC_JS_y.png"),width=14,height=8)
-ggsave(plot2,file=file.path(plotDir,"plots/TC_JS_d.png"),width=14,height=8)
-ggsave(plot3,file=file.path(plotDir,"plots/TC_JS_y_d.png"),width=14,height=8)
+ggsave(plot1,file=file.path(plotDir,"TC_JS_y.png"),width=14,height=8)
+ggsave(plot2,file=file.path(plotDir,"TC_JS_d.png"),width=14,height=8)
+ggsave(plot3,file=file.path(plotDir,"TC_JS_y_d.png"),width=14,height=8)
 rm(tmp)
 
 

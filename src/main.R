@@ -113,10 +113,13 @@ testOpenSim  <- function() {
   shapiro.test(estN.bs[[iS]]$t[,10])
   
   # Average bootstrap confidence intervals for different capture matrices
-  # TO DO - only calculating for first capture sim atm... just need to loop over all and average.
-  # estN.bs.sd.mean <- sqrt(apply(estN.bs[[1]]$t,2,var))
+  estN.bs.sd <- laply(estN.bs, function(x) {
+    x.sd <- sqrt(apply(x$t, 2, var))
+    return(x.sd)
+  })
   
-    
+  estN.bs.sd.mean <- apply(estN.bs.sd, 2, mean)
+  
   
   # calculate means from repeated simulations
   estN.mean[["Actual"]]  <- actN

@@ -73,8 +73,8 @@ save.image(file = fId)
 
 
 # Average bootstrap confidence intervals for different capture matrices
-estN.bs.sd <- laply(estN.bs, function(x) apply(x$t, 2, sd))
-estN.bs.sd.mean <- apply(estN.bs.sd, 2, mean)
+estN.bs.se <- laply(estN.bs, function(x) apply(x$t, 2, sd))
+estN.bs.se.mean <- apply(estN.bs.se, 2, mean)
 
 
 # calculate means from repeated simulations
@@ -82,9 +82,9 @@ estN.mean[["Actual"]]  <- actN
 estN.mean[["CR"]] <- apply(estN[["CR"]],2,mean)
 estN.mean[["JS"]] <- apply(estN[["JS"]],2,mean)
 
-# Calculate actual sd and mse
-estN.CR.sd  <- apply(estN[["CR"]],2,sd)
-estN.JS.sd  <- apply(estN[["JS"]],2,sd)
+# Calculate actual se and mse
+estN.CR.se  <- apply(estN[["CR"]],2,sd)
+estN.JS.se  <- apply(estN[["JS"]],2,sd)
 estN.CR.mse  <- sapply(1:t, function(i) mse.f(estN[["CR"]][,i], actN[i]))
 estN.JS.mse  <- sapply(1:t, function(i) mse.f(estN[["JS"]][,i], actN[i]))
 
@@ -93,13 +93,13 @@ estN.JS.mse  <- sapply(1:t, function(i) mse.f(estN[["JS"]][,i], actN[i]))
 # Convert to dataframe
 tmp1 <- data.frame("Method" = "CR",
                    "Period" = 1:t,
-                   "sd" = estN.CR.sd,
-                   "sd.bs" = estN.bs.sd.mean,
+                   "se" = estN.CR.se,
+                   "se.bs" = estN.bs.se.mean,
                    "mse" = estN.CR.mse)
 tmp2 <- data.frame("Method" = "JS",
                    "Period" = 1:t,
-                   "sd" = estN.JS.sd,
-                   "sd.bs" = NA,
+                   "se" = estN.JS.se,
+                   "se.bs" = NA,
                    "mse" = estN.JS.mse)
 
 error.df <- rbind(tmp1,tmp2)
@@ -107,8 +107,8 @@ rm(list=ls(pattern="tmp"))
 
 # calculate two sided 95% CI
 z.val <- qnorm(1-.05/2)
-error.df$ci.95 <- z.val*error.df$sd
-error.df$ci.bs.95 <- z.val*error.df$sd.bs
+error.df$ci.95 <- z.val*error.df$se
+error.df$ci.bs.95 <- z.val*error.df$se.bs
 
 #estBias <- how do I calculate bias here?
 

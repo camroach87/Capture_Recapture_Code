@@ -5,3 +5,6 @@
 output/popCheck.csv
 output/mtrxCaptY.csv
 .RData
+output/nB 5000 bkp/afterSimLoop_seed_1234_window_4.RData
+output/nB 5000 bkp/afterSimLoop_seed_1234_window_8.RData
+output/nB 5000 bkp/afterSimLoop_seed_1234_window_6.RData

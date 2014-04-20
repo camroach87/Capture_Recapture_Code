@@ -26,6 +26,8 @@ estVar   <- list("CR" = rep(NA,nCaptSims),
                  "JS" = rep(NA,nCaptSims))
 estN.mean <- list("CR" = rep(NA,t),
                   "JS" = rep(NA,t))
+estN.JS.ci.l <- matrix(NA,nCaptSims,t)
+estN.JS.ci.u <- matrix(NA,nCaptSims,t)
 estN.bs <- NULL
 estN.bs.ci <- NULL
 
@@ -37,12 +39,16 @@ for (iS in 1:nCaptSims) {
   #simulate a different capture matrix on each loop
   mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
   
-  # Calculate estimators
+  # Calculate JS pop est. and Manly C.I.
+  tmp <- calcJS(mtrxCapt)
+  estN[["JS"]][iS,] <- tmp[[1]]
+  estN.JS.ci.l[iS,] <- tmp[[2]]$ci.l
+  estN.JS.ci.u[iS,] <- tmp[[2]]$ci.u
+  
+  
+  # Calculate CR population estimate and then bootstrap
   estN[["CR"]][iS,] <- calcCR(mtrxCapt,window.val)
-  estN[["JS"]][iS,] <- calcJS(mtrxCapt)
   
-  
-  # Get bootstrap estimates
   nB <- 5000
   if (.Platform$OS.type == "windows") {
     # For windows use snow. Need to work out clustering to use more than one cpu - to do.
@@ -88,29 +94,56 @@ estN.JS.se  <- apply(estN[["JS"]],2,sd)
 estN.CR.mse  <- sapply(1:t, function(i) mse.f(estN[["CR"]][,i], actN[i]))
 estN.JS.mse  <- sapply(1:t, function(i) mse.f(estN[["JS"]][,i], actN[i]))
 
+# Get confidence intervals
+estN.JS.ci.l.mean <- apply(estN.JS.ci.l,2,mean)
+estN.JS.ci.u.mean <- apply(estN.JS.ci.u,2,mean)
 
+CR.ci.l <- estN.mean[["CR"]] - qnorm(1-.05/2)*estN.CR.se
+CR.ci.u <- estN.mean[["CR"]] + qnorm(1-.05/2)*estN.CR.se
+# Get BCa confidence intervals and take mean
+CR.bs.ci <- ldply(estN.bs,
+                  function(x) {
+                    # calc CI for each occasion
+                    ci.bca <- sapply(1:t, 
+                                     function(i) {
+                                       ci.bca <- boot.ci(x, index = i, type="bca")
+                                       ci.bca <- ci.bca$bca                    
+                                       })
+                    output <- data.frame("bca.l" = ci.bca[4,],
+                                         "bca.u" = ci.bca[5,],
+                                         "Period" =1:t)
+                    return(output)
+                  })
+
+#redo... use cast maybe?
+#CR.bs.ci.mean <- apply(CR.bs.ci,2,mean)
 
 # Convert to dataframe
-tmp1 <- data.frame("Method" = "CR",
+CR.df <- data.frame("Method" = "CR",
                    "Period" = 1:t,
                    "se" = estN.CR.se,
                    "se.bs" = estN.bs.se.mean,
-                   "mse" = estN.CR.mse)
-tmp2 <- data.frame("Method" = "JS",
+                   "mse" = estN.CR.mse,
+                   "ci.l" = CR.ci.l,
+                   "ci.u" = CR.ci.u,
+                   "ci.l.bs" = CR.bs.ci.mean$bca.l,
+                   "ci.u.bs" = CR.bs.ci.mean$bca.u)
+JS.df <- data.frame("Method" = "JS",
                    "Period" = 1:t,
                    "se" = estN.JS.se,
                    "se.bs" = NA,
-                   "mse" = estN.JS.mse)
+                   "mse" = estN.JS.mse,
+                   "ci.l" = estN.JS.ci.l.mean,
+                   "ci.u" = estN.JS.ci.u.mean,
+                   "ci.l.bs" = NA,
+                   "ci.u.bs" = NA)
 
-error.df <- rbind(tmp1,tmp2)
-rm(list=ls(pattern="tmp"))
+error.df <- rbind(CR.df,JS.df)
+rm(CR.df,JS.df)
 
-# calculate two sided 95% CI
-z.val <- qnorm(1-.05/2)
-error.df$ci.95 <- z.val*error.df$se
-error.df$ci.bs.95 <- z.val*error.df$se.bs
 
-#estBias <- how do I calculate bias here?
+
+
 
 # Munge data and then plot
 estN.df <- as.data.frame(estN.mean)

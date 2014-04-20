@@ -107,7 +107,7 @@ estN.CR <- data.frame()
 CR.levels <- NULL
 for (iW in seq(10,100,10)) {
   cat("Calculating CR abundance estimate for window size",iW,"...\n")
-  tmp <- CR_RobustDesign(mtrxCaptD, iW)
+  tmp <- calcCR(mtrxCaptD, iW)
   tmp <- as.data.frame(tmp)
   tmp$Occasion <- c(1:(dim(tmp)[1]))
   tmp <- merge(tmp, dates.occ)

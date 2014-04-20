@@ -38,7 +38,7 @@ for (iS in 1:nCaptSims) {
   mtrxCapt <- mkOpenCaptMtrx(mtrxPop, t, p, beta)
   
   # Calculate estimators
-  estN[["CR"]][iS,] <- CR_RobustDesign(mtrxCapt,window.val)
+  estN[["CR"]][iS,] <- calcCR(mtrxCapt,window.val)
   estN[["JS"]][iS,] <- calcJS(mtrxCapt)
   
   

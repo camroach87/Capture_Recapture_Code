@@ -12,7 +12,7 @@
 
 ######################### Estimators #####################
 
-CR_RobustDesign <- function(mtrxCapt, window) {
+calcCR <- function(mtrxCapt, window) {
   # DESCRIPTION: Estimates population by splitting sampling timeline into 
   # overlapping periods that are assumed to be closed. Calculate population in
   # each of these windows using closed methods.
@@ -62,7 +62,7 @@ CR_RobustDesign <- function(mtrxCapt, window) {
 
 CR.bs <- function(mtrxCapt, window, indices) {
   mtrxCapt <- mtrxCapt[indices,]
-  N.bs <- CR_RobustDesign(mtrxCapt, window)
+  N.bs <- calcCR(mtrxCapt, window)
   return(N.bs)
 }
 

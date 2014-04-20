@@ -113,9 +113,10 @@ calcJS <- function(mtrxCapt) {
       curCapt <- as.matrix(mtrxCapt[mtrxCapt[,i]>=1,])
       curNotCapt <- as.matrix(mtrxCapt[mtrxCapt[,i]==0,])
       
-      # R converts curCapt to an array when only one animal is captured (or not
-      # captured) which causes trhe resulting matrix to be around the wrong way.
-      # Need to transpose to fix.
+      # R converts curCapt to an array when only one animal is captured (or not 
+      # captured) which causes the resulting matrix to be around the wrong way. 
+      # Need to transpose to fix. UPDATE: could have just used drop=FALSE when 
+      # subsetting....
       if (sum(mtrxCapt[,i]>=1)==1) {curCapt <- t(curCapt)}
       if (sum(mtrxCapt[,i]==0)==1) {curNotCapt <- t(curNotCapt)}
       
@@ -134,9 +135,32 @@ calcJS <- function(mtrxCapt) {
 #     M <- m + R*Z/r
 #     N <- n*M/m
         
-    # bias adjusted
+    # bias corrected
     M <- m + (R+1)*Z/(r+1)
     N <- (n+1)*M/(m+1)
     
-    return(N)
+    N.ci <- calcManlyCi(N,n,M,m,R,r)
+
+    return(list("N"=N, "N.ci"=N.ci))
+}
+
+
+calcManlyCi <- function(N,n,M,m,R,r) {
+  # Calculates 95% confidence intervals for JS using Manly's method
+  
+  p <- n/N
+  
+  T_1.N <- log(N) + log(0.5*(1-0.5*p+(1-p)^2))
+  T_1.N.var <- (M-m+R+1)/(M+1)*(1/(r+1)-1/(R+1)) + 1/(m+1) - 1/(n+1)
+  
+  T_1l <- T_1.N - 1.6*sqrt(T_1.N.var)
+  T_1u <- T_1.N + 2.4*sqrt(T_1.N.var)
+  
+  N.ci.l <- (4*exp(T_1l) + n)^2/(16*exp(T_1l))
+  N.ci.u <- (4*exp(T_1u) + n)^2/(16*exp(T_1u))
+  
+  output <- data.frame("ci.l" = N.ci.l,
+                       "ci.u" = N.ci.u)
+  
+  return(output)  
 }

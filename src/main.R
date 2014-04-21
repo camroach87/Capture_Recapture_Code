@@ -12,9 +12,11 @@ require(plyr)
 require(reshape2)
 require(boot)
 require(KernSmooth)
+require(foreach)
 
 if (.Platform$OS.type == "windows") {
   require(snow)
+  require(doSNOW)
 } else if (.Platform$OS.type == "unix") {
   require(multicore)
 }

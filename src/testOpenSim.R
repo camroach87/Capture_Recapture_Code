@@ -69,11 +69,12 @@ save.image(file = fId)
 
 
 
+
+
 ## Bootstrap checks. Remember: index is the variable of interest, i.e. the 
 ## sampling occasion number. Interesting to look at edges vs middle.
 # boot.ci(estN.bs[[iS]], index=10)
 # plot(estN.bs[[iS]], index=1) 
-
 ## check if evidence to support normal
 #   shapiro.test(estN.bs[[iS]]$t[,10])
 
@@ -100,23 +101,39 @@ estN.JS.ci.u.mean <- apply(estN.JS.ci.u,2,mean)
 
 CR.ci.l <- estN.mean[["CR"]] - qnorm(1-.05/2)*estN.CR.se
 CR.ci.u <- estN.mean[["CR"]] + qnorm(1-.05/2)*estN.CR.se
+
+
 # Get BCa confidence intervals and take mean
-CR.bs.ci <- ldply(estN.bs,
-                  function(x) {
-                    # calc CI for each occasion
-                    ci.bca <- sapply(1:t, 
-                                     function(i) {
-                                       ci.bca <- boot.ci(x, index = i, type="bca")
-                                       ci.bca <- ci.bca$bca                    
-                                       })
-                    output <- data.frame("bca.l" = ci.bca[4,],
-                                         "bca.u" = ci.bca[5,],
-                                         "Period" =1:t)
-                    return(output)
-                  })
+# Clustering hasn't been tested on linux systems
+cl <- makeCluster(4, type = "SOCK")
+registerDoSNOW(cl)
+clusterEvalQ(cl, library(boot))
+clusterExport(cl, c("estN.bs"))
+sink("./output/log.txt", append=TRUE)
+
+bs.bca.ci <- foreach (iS=1:nCaptSims) %dopar% {
+  ci.bca <- sapply(1:t, 
+                   function(i) {
+                     ci.bca <- boot.ci(estN.bs[[iS]], index = i, type="bca")
+                     ci.bca <- ci.bca$bca
+                     print(paste("Sim", iS,"index", i, "complete."))
+                   })
+  output <- data.frame("bca.l" = ci.bca[4,],
+                       "bca.u" = ci.bca[5,],
+                       "Period" =1:t)
+}
+stopCluster(cl)
+sink()
+
+fId <- file.path(outputDir,paste0("bs_bca_ci_window_",window.val,".RData"))
+save(bs.bca.ci, file=fId)
 
 #redo... use cast maybe?
 #CR.bs.ci.mean <- apply(CR.bs.ci,2,mean)
+
+
+
+
 
 # Convert to dataframe
 CR.df <- data.frame("Method" = "CR",

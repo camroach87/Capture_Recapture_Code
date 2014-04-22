@@ -35,7 +35,9 @@ cat("\n")
 
 
 # Jolly Seber population estimates
-N_Y <- calcJS(mtrxCaptY)
+tmp <- calcJS(mtrxCaptY)
+N_Y <- tmp[[1]]
+N_Y.ci <- tmp[[2]]
 N_Y.df <- as.data.frame(N_Y)
 #Taking 1st June to be estimate time for years as most sampling happens
 #around/before this time.
@@ -45,7 +47,9 @@ N_Y.df$Method <- "JS on yearly grouped data"
 rownames(N_Y.df)  <- NULL
 colnames(N_Y.df)[1] <- "N"
 
-N_D <- calcJS(mtrxCaptD)
+tmp <- calcJS(mtrxCaptD)
+N_D <- tmp[[1]]
+N_D.ci <- tmp[[2]]
 N_D.df <- as.data.frame(N_D)
 N_D.df$Date <- ymd(rownames(N_D.df))
 N_D.df$Occasion <- c(1:(dim(N_D.df)[1]))
@@ -129,3 +133,5 @@ plot2 <- ggplot(tmp, aes(x=Occasion, y=N, colour=Method)) + geom_line() +
 
 print(plot1)
 print(plot2)
+ggsave(plot1,file=file.path(plotDir,"TC_CR_window_all.png"),width=14,height=8)
+ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)

@@ -1,5 +1,5 @@
-# Original code courtesy of Richard Huggins, University of Melbourne
-# Constructs population matrices for open populations
+# Population matrix code courtesy of Richard Huggins, University of Melbourne . 
+# Constructs population matrices for open populations.
 
 Pop.Mat.0 <- function(num,t,beta)
 {

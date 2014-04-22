@@ -103,32 +103,33 @@ CR.ci.l <- estN.mean[["CR"]] - qnorm(1-.05/2)*estN.CR.se
 CR.ci.u <- estN.mean[["CR"]] + qnorm(1-.05/2)*estN.CR.se
 
 
-# Get BCa confidence intervals and take mean
-# Clustering hasn't been tested on linux systems
+# Get BCa confidence intervals and take mean. Clustering hasn't been tested on 
+# linux systems. Recommend breaking foreach loop into chunks and joining lists.
 cl <- makeCluster(4, type = "SOCK")
 registerDoSNOW(cl)
 clusterEvalQ(cl, library(boot))
 clusterExport(cl, c("estN.bs"))
-sink("./output/log.txt", append=TRUE)
+writeLines(c(""), "./output/log.txt")
 
 bs.bca.ci <- foreach (iS=1:nCaptSims) %dopar% {
+  sink("./output/log.txt", append=TRUE)
   ci.bca <- sapply(1:t, 
                    function(i) {
-                     ci.bca <- boot.ci(estN.bs[[iS]], index = i, type="bca")
-                     ci.bca <- ci.bca$bca
-                     print(paste("Sim", iS,"index", i, "complete."))
+                     cat(paste0("Running sim ", iS," index ", i, "...\n"))
+                     ci.tmp <- boot.ci(estN.bs[[iS]], index = i, type="bca")
+                     ci.tmp <- ci.tmp$bca[c(4,5)]
                    })
-  output <- data.frame("bca.l" = ci.bca[4,],
-                       "bca.u" = ci.bca[5,],
+  sink()
+  output <- data.frame("bca.l" = ci.bca[1,],
+                       "bca.u" = ci.bca[2,],
                        "Period" =1:t)
 }
 stopCluster(cl)
-sink()
 
 fId <- file.path(outputDir,paste0("bs_bca_ci_window_",window.val,".RData"))
 save(bs.bca.ci, file=fId)
 
-#redo... use cast maybe?
+#redo... use unlist and cast?
 #CR.bs.ci.mean <- apply(CR.bs.ci,2,mean)
 
 

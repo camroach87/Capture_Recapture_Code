@@ -129,9 +129,15 @@ stopCluster(cl)
 fId <- file.path(outputDir,paste0("bs_bca_ci_window_",window.val,".RData"))
 save(bs.bca.ci, file=fId)
 
-#redo... use unlist and cast?
-#CR.bs.ci.mean <- apply(CR.bs.ci,2,mean)
-
+CR.bs.ci <- do.call("rbind", bs.bca.ci)
+CR.bs.ci.mean <- ddply(CR.bs.ci,
+                       .(Period),
+                       function(x) {
+                         bca.l <- mean(x$bca.l)
+                         bca.u <- mean(x$bca.u)
+                         data.frame("bca.l"=bca.l,
+                                    "bca.u"=bca.u)
+                       })
 
 
 

@@ -176,24 +176,27 @@ estN.tidy <- merge(estN.tidy,error.df,by=c("Method","Period"),all.x=TRUE)
 pd <- position_dodge(0.1)
 
 # plot of bootstrapped confidence intervals for CR
-plot1 <- ggplot(estN.tidy[estN.tidy$Method!="JS",], aes(x=Period, y=N, colour=Method)) + 
-  geom_errorbar(aes(ymin=N-ci.bs.95, ymax=N+ci.bs.95), width=.5, alpha=0.4) +
+idx <- estN.tidy$Method!="JS"
+plot1 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) + 
+  geom_errorbar(aes(ymin=ci.l.bs, ymax=ci.u.bs), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
   ggtitle("Abundance estimates of simulated open population. Bootstrap CI.") +
   theme_bw()
 
 # plot of actual confidence intervals for CR
-plot2 <- ggplot(estN.tidy[estN.tidy$Method!="JS",], aes(x=Period, y=N, colour=Method)) + 
-  geom_errorbar(aes(ymin=N-ci.95, ymax=N+ci.95), width=.5, alpha=0.4) +
+idx <- estN.tidy$Method!="JS"
+plot2 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) + 
+  geom_errorbar(aes(ymin=ci.l, ymax=ci.u), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
-  ggtitle("Abundance estimates of simulated open population. Actual CI") +
+  ggtitle("Abundance estimates of simulated open population. Actual CI.") +
   theme_bw()
 
 # Plot of JS and CR with CIs
-plot3 <- ggplot(estN.tidy, aes(x=Period, y=N, colour=Method)) +
-  geom_errorbar(aes(ymin=N-ci.95, ymax=N+ci.95), position=pd, width=.5, alpha=0.4) +
+idx <- estN.tidy$Method!="CR"
+plot3 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
+  geom_errorbar(aes(ymin=ci.l, ymax=ci.u), position=pd, width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(position=pd, size=3,shape=21,fill="white") +
   ggtitle("Abundance estimates of simulated open population") +

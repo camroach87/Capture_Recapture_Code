@@ -212,3 +212,6 @@ plot3 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
 print(plot1)
 print(plot2)
 print(plot3)
+ggsave(plot1,file=file.path(plotDir,"OpenSim_CR_bs.png"),width=14,height=8)
+ggsave(plot2,file=file.path(plotDir,"OpenSim_CR.png"),width=14,height=8)
+ggsave(plot3,file=file.path(plotDir,"OpenSim_JS.png"),width=14,height=8)

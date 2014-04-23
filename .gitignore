@@ -11,3 +11,4 @@ output/nB 5000 bkp/afterSimLoop_seed_1234_window_6.RData
 output/nb5000_20140421/afterSimLoop_seed_1234_window_4.RData
 output/nb5000_20140421/afterSimLoop_seed_1234_window_6.RData
 output/nb5000_20140421/afterSimLoop_seed_1234_window_8.RData
+output/log.txt

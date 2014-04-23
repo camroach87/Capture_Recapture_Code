@@ -7,7 +7,7 @@ N.0   <- 5000
 t     <- 20
 p     <- 0.02
 beta  <- 0.003
-window.val <- 8
+window.val <- 4
 
 
 # simulate population matrix

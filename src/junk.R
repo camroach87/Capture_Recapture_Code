@@ -1,3 +1,12 @@
+#### 22/4/2014 ####
+# calculates period over which sampling occurred for each year
+bla <- data.frame("date"=unique(data$surveydate))
+bla$year <- year(bla$date)
+bla2 <- ddply(bla,.(year), function(x) data.frame("minD"=min(x$date),"maxD"=max(x$date)))
+bla2$sampPeriod <- bla2$maxD-bla2$minD
+
+
+
 #### 23/9/2013 ####
 CR_RobustDesign(10,sim="Y", N.0=4000, p=0.02, nsampOcc=200, pBirth=0.03)
 

@@ -53,7 +53,7 @@ calcCR <- function(mtrxCapt, window) {
   aChao_endfix[(T-window+1):T,] <- t(matrix(aChao[dim(aChao)[1],],2,window))
   # Kernel smoothing
   h <- dpill(1:T,aChao_endfix[,1])
-  sChao <- locpoly(1:T,aChao_endfix[,1], bandwidth=h, gridsize=T)
+  sChao <- locpoly(1:T,aChao_endfix[,1], degree=1, bandwidth=h, gridsize=T)
   
   
   return(sChao$y)

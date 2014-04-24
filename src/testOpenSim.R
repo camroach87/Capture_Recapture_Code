@@ -82,7 +82,7 @@ save.image(file = fId)
 # Average bootstrap confidence intervals for different capture matrices
 estN.bs.se <- laply(estN.bs, function(x) apply(x$t, 2, sd))
 estN.bs.se.mean <- apply(estN.bs.se, 2, mean)
-
+estN.bs.se.med <- apply(estN.bs.se, 2, median)
 
 # calculate means from repeated simulations
 estN.mean[["Actual"]]  <- actN
@@ -208,10 +208,18 @@ plot3 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
   ggtitle("Abundance estimates of simulated open population") +
   theme_bw()
 
+plot4 <- qplot(x=estN.CR.se,y=estN.bs.se.med) + 
+  geom_smooth(method="lm") +
+  ggtitle("Median bootstrap standard error vs standard deviation for N for 20 capture occasions.") +
+  theme_bw()
+  
+
 
 print(plot1)
 print(plot2)
 print(plot3)
+print(plot4)
 ggsave(plot1,file=file.path(plotDir,"OpenSim_CR_bs.png"),width=14,height=8)
 ggsave(plot2,file=file.path(plotDir,"OpenSim_CR.png"),width=14,height=8)
 ggsave(plot3,file=file.path(plotDir,"OpenSim_JS.png"),width=14,height=8)
+ggsave(plot4,file=file.path(plotDir,"BS_se_vs_N_sd.png"),width=14,height=8)

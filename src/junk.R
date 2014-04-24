@@ -1,3 +1,16 @@
+#### 24/4/2014 ####
+#plots histograms and Q-Q plots for bootstrap estimators
+png(filename=file.path(plotDir,"bs_1_1.png"),width=14,height=8,units="in",res=300)
+plot(estN.bs[[1]],index=1)
+dev.off()
+png(filename=file.path(plotDir,"bs_1_10.png"),width=14,height=8,units="in",res=300)
+plot(estN.bs[[1]],index=10)
+dev.off()
+png(filename=file.path(plotDir,"bs_1_20.png"),width=14,height=8,units="in",res=300)
+plot(estN.bs[[1]],index=20)
+dev.off()
+
+
 #### 22/4/2014 ####
 # calculates period over which sampling occurred for each year
 bla <- data.frame("date"=unique(data$surveydate))

@@ -135,3 +135,30 @@ print(plot1)
 print(plot2)
 ggsave(plot1,file=file.path(plotDir,"TC_CR_window_all.png"),width=14,height=8)
 ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
+
+
+
+# Produce same plots but with BCa confidence intervals
+
+# First bootstrap
+nB <- 5000
+window.val <- 20
+if (.Platform$OS.type == "windows") {
+  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="snow",ncpus=1,window=window.val)
+} else if (.Platform$OS.type == "unix") {
+  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="multicore",ncpus=3,window=window.val)
+}
+
+# Then calculate BCa CIs
+t <- ncol(mtrxCaptD)
+ci.bca <- sapply(1:t, 
+                 function(i) {
+                   cat(paste0("Running index ", i, " out of ",t,"...\n"))
+                   ci.tmp <- boot.ci(estN.bs, index = i, type="bca")
+                   ci.tmp <- ci.tmp$bca[c(4,5)]
+                 })
+
+bs.bca.ci<- data.frame("bca.l" = ci.bca[1,],
+                     "bca.u" = ci.bca[2,],
+                     "Period" =1:t)
+

@@ -144,10 +144,22 @@ ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
 nB <- 5000
 window.val <- 20
 if (.Platform$OS.type == "windows") {
-  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="snow",ncpus=1,window=window.val)
+  cl <- makeCluster(4, type = "SOCK")
+  registerDoSNOW(cl)
+  clusterEvalQ(cl, library(boot))
+  clusterEvalQ(cl, library(KernSmooth))
+  clusterExport(cl, c("calcCR","calcChaoMt"))
+  
+  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="snow",ncpus=4,window=window.val,cl=cl)
+  
+  stopCluster(cl)
 } else if (.Platform$OS.type == "unix") {
-  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="multicore",ncpus=3,window=window.val)
+  estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="multicore",ncpus=4,window=window.val)
 }
+
+fId <- file.path(outputDir,paste0("bs_TC_window",window.val,".RData"))
+save(estN.bs, file=fId)
+
 
 # Then calculate BCa CIs
 t <- ncol(mtrxCaptD)

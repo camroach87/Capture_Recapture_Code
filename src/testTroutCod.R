@@ -143,6 +143,7 @@ ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
 # First bootstrap
 nB <- 5000
 window.val <- 20
+timer1 <- Sys.time()
 if (.Platform$OS.type == "windows") {
   cl <- makeCluster(4, type = "SOCK")
   registerDoSNOW(cl)
@@ -157,6 +158,8 @@ if (.Platform$OS.type == "windows") {
   estN.bs <- boot(data=mtrxCaptD,statistic=CR.bs,R=nB,parallel="multicore",ncpus=4,window=window.val)
 }
 
+timer2 <- Sys.time()
+print(difftime(timer2,timer1,units="mins"))
 fId <- file.path(outputDir,paste0("bs_TC_window",window.val,".RData"))
 save(estN.bs, file=fId)
 

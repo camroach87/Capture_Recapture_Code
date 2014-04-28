@@ -141,7 +141,7 @@ ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
 # Produce same plots but with BCa confidence intervals
 
 # First bootstrap
-nB <- 5000
+nB <- 10000
 window.val <- 20
 timer1 <- Sys.time()
 if (.Platform$OS.type == "windows") {
@@ -160,7 +160,7 @@ if (.Platform$OS.type == "windows") {
 
 timer2 <- Sys.time()
 print(difftime(timer2,timer1,units="mins"))
-fId <- file.path(outputDir,paste0("bs_TC_window",window.val,".RData"))
+fId <- file.path(outputDir,paste0("bs_TC_window_",window.val,".RData"))
 save(estN.bs, file=fId)
 
 

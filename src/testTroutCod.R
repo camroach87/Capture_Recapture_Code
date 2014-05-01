@@ -1,3 +1,5 @@
+source("./src/init.R")
+
 data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
 data$surveydate <- dmy_hm(data$surveydate)
 data <- data[order(data$surveydate),]

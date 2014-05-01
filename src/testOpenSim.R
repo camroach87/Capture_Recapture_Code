@@ -1,3 +1,5 @@
+source("./src/init.R")
+
 # Open population sim
 timer1 <- Sys.time()
 

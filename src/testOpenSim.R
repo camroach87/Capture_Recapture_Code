@@ -105,8 +105,8 @@ CR.ci.l <- estN.mean[["CR"]] - qnorm(1-.05/2)*estN.CR.se
 CR.ci.u <- estN.mean[["CR"]] + qnorm(1-.05/2)*estN.CR.se
 
 
-# Get BCa confidence intervals and take mean. Clustering hasn't been tested on 
-# linux systems. Recommend breaking foreach loop into chunks and joining lists.
+#Calculate BCa confidence intervals. Note: Clustering hasn't been tested on
+#linux systems. Recommend breaking foreach loop into chunks and joining lists.
 cl <- makeCluster(4, type = "SOCK")
 registerDoSNOW(cl)
 clusterEvalQ(cl, library(boot))
@@ -122,8 +122,8 @@ bs.bca.ci <- foreach (iS=1:nCaptSims) %dopar% {
                      ci.tmp <- ci.tmp$bca[c(4,5)]
                    })
   sink()
-  output <- data.frame("bca.l" = ci.bca[1,],
-                       "bca.u" = ci.bca[2,],
+  output <- data.frame("bs.ci.l" = ci.bca[1,],
+                       "bs.ci.u" = ci.bca[2,],
                        "Period" =1:t)
 }
 stopCluster(cl)
@@ -131,14 +131,35 @@ stopCluster(cl)
 fId <- file.path(outputDir,paste0("bs_bca_ci_window_",window.val,".RData"))
 save(bs.bca.ci, file=fId)
 
-CR.bs.ci <- do.call("rbind", bs.bca.ci)
+
+# calculate bootstrap percentile confidence intervals
+bs.perc.ci <- foreach (iS=1:nCaptSims) %do% {
+  ci.perc <- sapply(1:t, 
+                    function(i) {
+                      cat(paste0("Running sim ", iS," index ", i, "...\n"))
+                      ci.tmp <- boot.ci(estN.bs[[iS]], index = i, type="perc")
+                      ci.tmp <- ci.tmp$perc[c(4,5)]
+                    })
+  output <- data.frame("bs.ci.l" = ci.perc[1,],
+                       "bs.ci.u" = ci.perc[2,],
+                       "Period" =1:t)
+}
+
+
+# calculate coverage probabilities for BCa and percentile methods
+calcCoverage(actN, bs.bca.ci)
+calcCoverage(actN, bs.perc.ci)
+
+
+# calculate mean confidence intervals for bootstraps
+CR.bs.ci <- do.call("rbind", bs.perc.ci)
 CR.bs.ci.mean <- ddply(CR.bs.ci,
                        .(Period),
                        function(x) {
-                         bca.l <- mean(x$bca.l)
-                         bca.u <- mean(x$bca.u)
-                         data.frame("bca.l"=bca.l,
-                                    "bca.u"=bca.u)
+                         bs.ci.l <- mean(x$bs.ci.l)
+                         bs.ci.u <- mean(x$bs.ci.u)
+                         data.frame("bs.ci.l"=bs.ci.l,
+                                    "bs.ci.u"=bs.ci.u)
                        })
 
 
@@ -152,8 +173,8 @@ CR.df <- data.frame("Method" = "CR",
                    "mse" = estN.CR.mse,
                    "ci.l" = CR.ci.l,
                    "ci.u" = CR.ci.u,
-                   "ci.l.bs" = CR.bs.ci.mean$bca.l,
-                   "ci.u.bs" = CR.bs.ci.mean$bca.u)
+                   "ci.l.bs" = CR.bs.ci.mean$bs.ci.l,
+                   "ci.u.bs" = CR.bs.ci.mean$bs.ci.u)
 JS.df <- data.frame("Method" = "JS",
                    "Period" = 1:t,
                    "se" = estN.JS.se,

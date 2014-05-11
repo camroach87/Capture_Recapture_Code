@@ -125,17 +125,20 @@ for (iW in seq(10,100,10)) {
 
 # Plot window size impact for CR estimate of TC population
 estN.CR$Method <- factor(estN.CR$Method, levels=CR.levels)
-plot1 <- ggplot(estN.CR, aes(x=Occasion, y=N, colour=Method)) + geom_line() + 
+plot1 <- ggplot(estN.CR, aes(x=Occasion, y=N)) + 
+  geom_line() + 
+  facet_wrap(~Method,ncol=2) +
   ggtitle("CR estimates of abundance for TC capture data.") +
   theme_bw()
-tmp <- estN.CR[estN.CR$Method=="CR window size 20",]
-plot2 <- ggplot(tmp, aes(x=Occasion, y=N, colour=Method)) + geom_line() + 
+estN.CR.20 <- estN.CR[estN.CR$Method=="CR window size 20",]
+plot2 <- ggplot(estN.CR.20, aes(x=Occasion, y=N)) + 
+  geom_line() + 
   ggtitle("CR estimates of abundance for TC capture data.") +
   theme_bw()
 
 print(plot1)
 print(plot2)
-ggsave(plot1,file=file.path(plotDir,"TC_CR_window_all.png"),width=14,height=8)
+ggsave(plot1,file=file.path(plotDir,"TC_CR_window_all.png"),width=8.3,height=11.7)
 ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
 
 
@@ -166,16 +169,26 @@ fId <- file.path(outputDir,paste0("bs_TC_window_",window.val,".RData"))
 save(estN.bs, file=fId)
 
 
-# Then calculate BCa CIs
+# Then calculate bootstrap percentile CIs
 t <- ncol(mtrxCaptD)
-ci.bca <- sapply(1:t, 
-                 function(i) {
-                   cat(paste0("Running index ", i, " out of ",t,"...\n"))
-                   ci.tmp <- boot.ci(estN.bs, index = i, type="bca")
-                   ci.tmp <- ci.tmp$bca[c(4,5)]
-                 })
+ci.perc <- sapply(1:t, 
+                  function(i) {
+                    cat(paste0("Running index ", i, "...\n"))
+                    ci.tmp <- boot.ci(estN.bs, index = i, type="perc")
+                    ci.tmp <- ci.tmp$perc[c(4,5)]
+                  })
+bs.perc.ci <- data.frame("bs.ci.l" = ci.perc[1,],
+                     "bs.ci.u" = ci.perc[2,],
+                     "Occasion" =1:t)
 
-bs.bca.ci<- data.frame("bca.l" = ci.bca[1,],
-                     "bca.u" = ci.bca[2,],
-                     "Period" =1:t)
+# plot trout cod estimate and percentile confidence intervals
+estN.CR.20 <- merge(estN.CR.20,bs.perc.ci)
 
+p1 <- ggplot(estN.CR.20, aes(x=Occasion, y=N)) + 
+  #geom_errorbar(aes(ymin=bs.ci.l, ymax=bs.ci.u), width=.5, alpha=0.4) +
+  geom_ribbon(aes(ymin=bs.ci.l, ymax=bs.ci.u), alpha=0.2) +
+  geom_line() + 
+  ggtitle("CR estimates of abundance for TC capture data.") +
+  theme_bw()
+print(p1)
+ggsave(file=file.path(plotDir,"TC_CR_window_20_CI.png"),width=14,height=8)

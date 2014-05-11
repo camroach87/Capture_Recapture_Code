@@ -206,7 +206,7 @@ pd <- position_dodge(0.1)
 
 # plot of bootstrapped confidence intervals for CR
 idx <- estN.tidy$Method!="JS"
-plot1 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) + 
+plot1 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) + 
   geom_errorbar(aes(ymin=ci.l.bs, ymax=ci.u.bs), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
@@ -215,7 +215,7 @@ plot1 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) +
 
 # plot of actual confidence intervals for CR
 idx <- estN.tidy$Method!="JS"
-plot2 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) + 
+plot2 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) + 
   geom_errorbar(aes(ymin=ci.l, ymax=ci.u), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
@@ -224,7 +224,7 @@ plot2 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) +
 
 # Plot of JS and CR with CIs
 idx <- estN.tidy$Method!="CR"
-plot3 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) +
+plot3 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) +
   geom_errorbar(aes(ymin=ci.l, ymax=ci.u), position=pd, width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(position=pd, size=3,shape=21,fill="white") +
@@ -232,7 +232,7 @@ plot3 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, colour=Method)) +
   theme_bw()
 
 plot4 <- qplot(x=estN.CR.se,y=estN.bs.se.med) + 
-  geom_smooth(method="lm") +
+  geom_smooth(method="lm", colour="black") +
   ggtitle("Median bootstrap standard error vs standard deviation for N for 20 capture occasions.") +
   theme_bw()
   

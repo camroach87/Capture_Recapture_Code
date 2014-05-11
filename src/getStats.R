@@ -51,3 +51,24 @@ calcZ <- function(curNotCapt, i) {
 mse.f <- function(x, x.act) {
   sum((x - x.act) ^ 2) / length(x)
 }
+
+
+
+calcCoverage <- function(actN, bs.ci) {
+  # calculate coverage probability
+  nCaptSims <- length(bs.ci)
+  
+  coverage <- NULL
+  for (i in 1:nCaptSims) {
+    x <- bs.ci[[i]]
+    tmp <- actN<=x$bs.ci.u & actN>=x$bs.ci.l
+    coverage.tmp <- data.frame("withinCi"=tmp,"Period"=1:20)
+    coverage <- rbind(coverage,coverage.tmp)
+  }
+  
+  
+  coverage.prob <- aggregate(withinCi~Period, coverage, sum)
+  coverage.prob$probWithinCi <- coverage.prob$withinCi/nCaptSims
+  
+  return(coverage.prob)
+}

@@ -105,8 +105,8 @@ CR.ci.l <- estN.mean[["CR"]] - qnorm(1-.05/2)*estN.CR.se
 CR.ci.u <- estN.mean[["CR"]] + qnorm(1-.05/2)*estN.CR.se
 
 
-# Get BCa confidence intervals and take mean. Clustering hasn't been tested on 
-# linux systems. Recommend breaking foreach loop into chunks and joining lists.
+#Calculate BCa confidence intervals. Note: Clustering hasn't been tested on
+#linux systems. Recommend breaking foreach loop into chunks and joining lists.
 cl <- makeCluster(4, type = "SOCK")
 registerDoSNOW(cl)
 clusterEvalQ(cl, library(boot))
@@ -122,23 +122,44 @@ bs.bca.ci <- foreach (iS=1:nCaptSims) %dopar% {
                      ci.tmp <- ci.tmp$bca[c(4,5)]
                    })
   sink()
-  output <- data.frame("bca.l" = ci.bca[1,],
-                       "bca.u" = ci.bca[2,],
-                       "Period" =1:t)
+  output <- data.frame("bs.ci.l" = ci.bca[1,],
+                       "bs.ci.u" = ci.bca[2,],
+                       "Occasion" =1:t)
 }
 stopCluster(cl)
 
 fId <- file.path(outputDir,paste0("bs_bca_ci_window_",window.val,".RData"))
 save(bs.bca.ci, file=fId)
 
-CR.bs.ci <- do.call("rbind", bs.bca.ci)
+
+# calculate bootstrap percentile confidence intervals
+bs.perc.ci <- foreach (iS=1:nCaptSims) %do% {
+  ci.perc <- sapply(1:t, 
+                    function(i) {
+                      cat(paste0("Running sim ", iS," index ", i, "...\n"))
+                      ci.tmp <- boot.ci(estN.bs[[iS]], index = i, type="perc")
+                      ci.tmp <- ci.tmp$perc[c(4,5)]
+                    })
+  output <- data.frame("bs.ci.l" = ci.perc[1,],
+                       "bs.ci.u" = ci.perc[2,],
+                       "Occasion" =1:t)
+}
+
+
+# calculate coverage probabilities for BCa and percentile methods
+calcCoverage(actN, bs.bca.ci)
+calcCoverage(actN, bs.perc.ci)
+
+
+# calculate mean confidence intervals for bootstraps
+CR.bs.ci <- do.call("rbind", bs.perc.ci)
 CR.bs.ci.mean <- ddply(CR.bs.ci,
-                       .(Period),
+                       .(Occasion),
                        function(x) {
-                         bca.l <- mean(x$bca.l)
-                         bca.u <- mean(x$bca.u)
-                         data.frame("bca.l"=bca.l,
-                                    "bca.u"=bca.u)
+                         bs.ci.l <- mean(x$bs.ci.l)
+                         bs.ci.u <- mean(x$bs.ci.u)
+                         data.frame("bs.ci.l"=bs.ci.l,
+                                    "bs.ci.u"=bs.ci.u)
                        })
 
 
@@ -146,16 +167,16 @@ CR.bs.ci.mean <- ddply(CR.bs.ci,
 
 # Convert to dataframe
 CR.df <- data.frame("Method" = "CR",
-                   "Period" = 1:t,
+                   "Occasion" = 1:t,
                    "se" = estN.CR.se,
                    "se.bs" = estN.bs.se.mean,
                    "mse" = estN.CR.mse,
                    "ci.l" = CR.ci.l,
                    "ci.u" = CR.ci.u,
-                   "ci.l.bs" = CR.bs.ci.mean$bca.l,
-                   "ci.u.bs" = CR.bs.ci.mean$bca.u)
+                   "ci.l.bs" = CR.bs.ci.mean$bs.ci.l,
+                   "ci.u.bs" = CR.bs.ci.mean$bs.ci.u)
 JS.df <- data.frame("Method" = "JS",
-                   "Period" = 1:t,
+                   "Occasion" = 1:t,
                    "se" = estN.JS.se,
                    "se.bs" = NA,
                    "mse" = estN.JS.mse,
@@ -173,19 +194,19 @@ rm(CR.df,JS.df)
 
 # Munge data and then plot
 estN.df <- as.data.frame(estN.mean)
-estN.df$Period <- c(1:t)
-estN.tidy <- melt(estN.df, "Period", variable.name = "Method", value.name = "N")
+estN.df$Occasion <- c(1:t)
+estN.tidy <- melt(estN.df, "Occasion", variable.name = "Method", value.name = "N")
 estN.tidy$Method <- factor(estN.tidy$Method, levels=c("Actual","CR","JS"))
 
 #add errors to N estimates
-estN.tidy <- merge(estN.tidy,error.df,by=c("Method","Period"),all.x=TRUE)
+estN.tidy <- merge(estN.tidy,error.df,by=c("Method","Occasion"),all.x=TRUE)
 
 # plots
 pd <- position_dodge(0.1)
 
 # plot of bootstrapped confidence intervals for CR
 idx <- estN.tidy$Method!="JS"
-plot1 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) + 
+plot1 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) + 
   geom_errorbar(aes(ymin=ci.l.bs, ymax=ci.u.bs), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
@@ -194,7 +215,7 @@ plot1 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
 
 # plot of actual confidence intervals for CR
 idx <- estN.tidy$Method!="JS"
-plot2 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) + 
+plot2 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) + 
   geom_errorbar(aes(ymin=ci.l, ymax=ci.u), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
@@ -203,7 +224,7 @@ plot2 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
 
 # Plot of JS and CR with CIs
 idx <- estN.tidy$Method!="CR"
-plot3 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
+plot3 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) +
   geom_errorbar(aes(ymin=ci.l, ymax=ci.u), position=pd, width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(position=pd, size=3,shape=21,fill="white") +
@@ -211,7 +232,7 @@ plot3 <- ggplot(estN.tidy[idx,], aes(x=Period, y=N, colour=Method)) +
   theme_bw()
 
 plot4 <- qplot(x=estN.CR.se,y=estN.bs.se.med) + 
-  geom_smooth(method="lm") +
+  geom_smooth(method="lm", colour="black") +
   ggtitle("Median bootstrap standard error vs standard deviation for N for 20 capture occasions.") +
   theme_bw()
   

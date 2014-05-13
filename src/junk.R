@@ -1,3 +1,12 @@
+#### 11/5/2014 ####
+# rename list items in bs.bca.ci
+bs.bca.ci <- lapply(bs.bca.ci,
+                    function(x) {
+                      names(x) <- c("bs.ci.l","bs.ci.u","Occasion")
+                      return(x)}
+                    )
+
+
 #### 24/4/2014 ####
 #plots histograms and Q-Q plots for bootstrap estimators
 png(filename=file.path(plotDir,"bs_1_1.png"),width=14,height=8,units="in",res=300)

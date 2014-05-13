@@ -16,7 +16,7 @@ window.val <- 4
 burnIn  <- 500 #burn in for population stability
 mtrxPop <- Pop.Mat(N.0,t,burnIn,beta)
 actN    <- apply(mtrxPop,2,sum)
-nCaptSims   <- 100
+nCaptSims   <- 1000
 
 
 # initialise lists
@@ -53,8 +53,16 @@ for (iS in 1:nCaptSims) {
   
   nB <- 5000
   if (.Platform$OS.type == "windows") {
-    # For windows use snow. Need to work out clustering to use more than one cpu - to do.
-    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="snow",ncpus=1,window=window.val)
+    # For windows use snow an clustering.
+    cl <- makeCluster(4, type = "SOCK")
+    registerDoSNOW(cl)
+    clusterEvalQ(cl, library(boot))
+    clusterEvalQ(cl, library(KernSmooth))
+    clusterExport(cl, c("calcCR","calcChaoMt"))
+    
+    estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="snow",ncpus=4,window=window.val,cl=cl)
+    
+    stopCluster(cl)
   } else if (.Platform$OS.type == "unix") {
     # For linux use multicore. Don't need to worry about cluster stuff.
     estN.bs[[iS]] <- boot(data=mtrxCapt,statistic=CR.bs,R=nB,parallel="multicore",ncpus=3,window=window.val)

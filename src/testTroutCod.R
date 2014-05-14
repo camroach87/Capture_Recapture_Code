@@ -1,5 +1,10 @@
 source("./src/init.R")
 
+# input
+# choose from young, adult or all
+dataFilter <- "adult"
+
+# load data
 data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
 data$surveydate <- dmy_hm(data$surveydate)
 data <- data[order(data$surveydate),]
@@ -7,6 +12,17 @@ data <- data[order(data$surveydate),]
 # add year to data
 data$year <- year(data$surveydate)
 data$month <- month(data$surveydate)
+
+# select data filter
+if (dataFilter == "young") {
+  # 276 is median length. Used to split young and adults.
+  data <- data[data$totallength<=276,]
+} else if (dataFilter == "adult") {
+  data <- data[data$totallength>276,]
+}
+
+  
+  
 
 mtrxCaptY <- table(data$idfish, data$year)
 mtrxCaptD <- table(data$idfish, data$surveydate)
@@ -82,9 +98,9 @@ plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, linetype=Method)) + geom_line() +
 print(plot1)
 print(plot2)
 print(plot3)
-ggsave(plot1,file=file.path(plotDir,"TC_JS_y.png"),width=14,height=8)
-ggsave(plot2,file=file.path(plotDir,"TC_JS_d.png"),width=14,height=8)
-ggsave(plot3,file=file.path(plotDir,"TC_JS_y_d.png"),width=14,height=8)
+ggsave(plot1,file=file.path(plotDir,paste0("TC_JS_y_",dataFilter,".png")),width=14,height=8)
+ggsave(plot2,file=file.path(plotDir,paste0("TC_JS_d_",dataFilter,".png")),width=14,height=8)
+ggsave(plot3,file=file.path(plotDir,paste0("TC_JS_y_d_",dataFilter,".png")),width=14,height=8)
 rm(tmp)
 
 
@@ -136,15 +152,15 @@ plot2 <- ggplot(estN.CR.20, aes(x=Occasion, y=N)) +
 
 print(plot1)
 print(plot2)
-ggsave(plot1,file=file.path(plotDir,"TC_CR_window_all.png"),width=8.3,height=11.7)
-ggsave(plot2,file=file.path(plotDir,"TC_CR_window_20.png"),width=14,height=8)
+ggsave(plot1,file=file.path(plotDir,paste0("TC_CR_window_all_",dataFilter,".png")),width=8.3,height=11.7)
+ggsave(plot2,file=file.path(plotDir,paste0("TC_CR_window_20_",dataFilter,".png")),width=14,height=8)
 
 
 
 # Produce same plots but with BCa confidence intervals
 
 # First bootstrap
-nB <- 10000
+nB <- 5000
 window.val <- 20
 timer1 <- Sys.time()
 if (.Platform$OS.type == "windows") {
@@ -163,7 +179,7 @@ if (.Platform$OS.type == "windows") {
 
 timer2 <- Sys.time()
 print(difftime(timer2,timer1,units="mins"))
-fId <- file.path(outputDir,paste0("bs_TC_window_",window.val,".RData"))
+fId <- file.path(outputDir,paste0("bs_TC_window_",window.val,"_",dataFilter,".RData"))
 save(estN.bs, file=fId)
 
 
@@ -189,4 +205,4 @@ p1 <- ggplot(estN.CR.20, aes(x=Occasion, y=N)) +
   ggtitle("CR estimates of abundance for TC capture data.") +
   theme_bw()
 print(p1)
-ggsave(file=file.path(plotDir,"TC_CR_window_20_CI.png"),width=14,height=8)
+ggsave(file=file.path(plotDir,paste0("TC_CR_window_20_CI_",dataFilter,".png")),width=14,height=8)

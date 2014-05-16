@@ -218,6 +218,7 @@ plot1 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) +
   geom_errorbar(aes(ymin=ci.l.bs, ymax=ci.u.bs), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
+  ylim(1500,3500) +
   ggtitle("Abundance estimates of simulated open population. Bootstrap CI.") +
   theme_bw()
 
@@ -227,6 +228,7 @@ plot2 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) +
   geom_errorbar(aes(ymin=ci.l, ymax=ci.u), width=.5, alpha=0.4) +
   geom_line() + 
   geom_point(size=3,shape=21,fill="white") +
+  ylim(1500,3500) +
   ggtitle("Abundance estimates of simulated open population. Actual CI.") +
   theme_bw()
 

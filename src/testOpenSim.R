@@ -242,7 +242,7 @@ plot3 <- ggplot(estN.tidy[idx,], aes(x=Occasion, y=N, linetype=Method)) +
   theme_bw()
 
 plot4 <- qplot(x=estN.CR.se,y=estN.bs.se.med) + 
-  #geom_smooth(method="lm", colour="black") +
+  geom_smooth(method="lm", colour="black") +
   ggtitle("Median bootstrap standard error vs standard deviation for N for 20 capture occasions.") +
   xlab("Median bootstrap standard error") +
   ylab("Standard deviation of N") +

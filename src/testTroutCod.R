@@ -2,7 +2,7 @@ source("./src/init.R")
 
 # input
 # choose from young, adult or all
-dataFilter <- "adult"
+dataFilter <- "all"
 
 # load data
 data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
@@ -112,6 +112,8 @@ rm(tmp)
 
 # Get dates and occasion from N_D.df. Bit hacky...
 dates.occ <- N_D.df[,c("Date","Occasion")]
+dates.min <- min(dates.occ$Date)
+dates.occ$Day <- as.numeric(difftime(dates.occ$Date, dates.min, units="days"))
 #dates.diff <- max(dates.occ$Date)-min(dates.occ$Date)+1
 #dates.all <- min(dates.occ$Date) + days(0:dates.diff)
 #dates.all <- data.frame("Date" = dates.all)
@@ -157,7 +159,7 @@ ggsave(plot2,file=file.path(plotDir,paste0("TC_CR_window_20_",dataFilter,".png")
 
 
 
-# Produce same plots but with BCa confidence intervals
+# Produce same plots but with confidence intervals
 
 # First bootstrap
 nB <- 5000
@@ -206,3 +208,20 @@ p1 <- ggplot(estN.CR.20, aes(x=Occasion, y=N)) +
   theme_bw()
 print(p1)
 ggsave(file=file.path(plotDir,paste0("TC_CR_window_20_CI_",dataFilter,".png")),width=14,height=8)
+
+
+
+
+# now plot against time
+N.time <- calcCR(mtrxCaptD,20, xType="Time", dates.occ=dates.occ)
+
+
+
+p1 <- qplot(N.time$x, N.time$y, geom="line") +
+  xlab("Date") +
+  ylab("N") +
+  ggtitle("CR estimates of abundance for TC capture data with respect to time.") +  
+  theme_bw()
+print(p1)
+ggsave(file=file.path(plotDir,paste0("TC_CR_time_window_20_",dataFilter,".png")),width=14,height=8)
+

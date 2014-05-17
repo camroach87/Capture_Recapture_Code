@@ -12,7 +12,7 @@
 
 ######################### Estimators #####################
 
-calcCR <- function(mtrxCapt, window) {
+calcCR <- function(mtrxCapt, window, xType="Occasion", timeBandwidth=180, dates.occ) {
   # DESCRIPTION: Estimates population by splitting sampling timeline into 
   # overlapping periods that are assumed to be closed. Calculate population in
   # each of these windows using closed methods.
@@ -26,8 +26,14 @@ calcCR <- function(mtrxCapt, window) {
   # duplicate values of end points so that we can get "window" number of 
   # values.
   #
-  # Use direct plug-in method, dpill(), to calculate bandwidth for kernel
-  # regression.
+  # Use direct plug-in method, dpill(), to calculate bandwidth for kernel 
+  # regression when dealing with occasions. For times, bandwidth of 180 has been
+  # selected as default as it appears to give the best tradeoff between bias and
+  # variance for the trout cod data. Obviously, if different data is used this
+  # value may need to be updated.
+  #
+  # xType specifies if we are basing the estimates on capture occasion or
+  # capture time. Takes "Occasion" and "Time" as inputs.
   
   
   T <- ncol(mtrxCapt)
@@ -52,11 +58,23 @@ calcCR <- function(mtrxCapt, window) {
   aChao_endfix[(window+1):(T-window),] <- aChao[,]
   aChao_endfix[(T-window+1):T,] <- t(matrix(aChao[dim(aChao)[1],],2,window))
   # Kernel smoothing
-  h <- dpill(1:T,aChao_endfix[,1])
-  sChao <- locpoly(1:T,aChao_endfix[,1], degree=1, bandwidth=h, gridsize=T)
+  if (xType == "Occasion") {
+    h <- dpill(1:T,aChao_endfix[,1])
+    sChao <- locpoly(1:T,aChao_endfix[,1], degree=1, bandwidth=h, gridsize=T)
+    
+    output <- sChao$y
+  } else if (xType == "Time") {
+    h <- timeBandwidth # works well for the TC data
+    sChao <- locpoly(dates.occ$Day,aChao_endfix[,1], degree=1, bandwidth=h, gridsize=T)
+    
+    # converts the x values from locpoly to dates
+    sChao$x <- min(dates.occ$Date) + sChao$x*60*60*24
+    
+    output <- sChao
+  }
   
   
-  return(sChao$y)
+  return(output)
 }
 
 
@@ -66,6 +84,11 @@ CR.bs <- function(mtrxCapt, window, indices) {
   return(N.bs)
 }
 
+CR.bs.time <- function(mtrxCapt, window, dates.occ, indices) {
+  mtrxCapt <- mtrxCapt[indices,]
+  N.bs <- calcCR(mtrxCapt, window, xType="Time", dates.occ)
+  return(N.bs)
+}
 
 calcChaoMt <- function(mtrxCapt, bc=TRUE) {
   # DESCRIPTION: Chao's sparse data estimator for closed populations

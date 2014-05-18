@@ -86,8 +86,8 @@ CR.bs <- function(mtrxCapt, window, indices) {
 
 CR.bs.time <- function(mtrxCapt, window, dates.occ, indices) {
   mtrxCapt <- mtrxCapt[indices,]
-  N.bs <- calcCR(mtrxCapt, window, xType="Time", dates.occ)
-  return(N.bs)
+  N.bs <- calcCR(mtrxCapt, window, xType="Time", dates.occ=dates.occ)
+  return(N.bs$y)
 }
 
 calcChaoMt <- function(mtrxCapt, bc=TRUE) {

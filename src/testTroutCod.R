@@ -212,16 +212,55 @@ ggsave(file=file.path(plotDir,paste0("TC_CR_window_20_CI_",dataFilter,".png")),w
 
 
 
-# now plot against time
+##### now plot against time
+# get N estimate
 N.time <- calcCR(mtrxCaptD,20, xType="Time", dates.occ=dates.occ)
 
+# get bootstrapped percentile CIs
+window.val <- 20
+timer1 <- Sys.time()
+if (.Platform$OS.type == "windows") {
+  cl <- makeCluster(4, type = "SOCK")
+  registerDoSNOW(cl)
+  clusterEvalQ(cl, library(boot))
+  clusterEvalQ(cl, library(KernSmooth))
+  clusterExport(cl, c("calcCR","calcChaoMt"))
+  
+  estN.bs.time <- boot(data=mtrxCaptD,statistic=CR.bs.time,R=nB,parallel="snow",
+                  ncpus=4,window=window.val,dates.occ=dates.occ,cl=cl)
+  
+  stopCluster(cl)
+} else if (.Platform$OS.type == "unix") {
+  estN.bs.time <- boot(data=mtrxCaptD,statistic=CR.bs.time,R=nB,parallel="multicore",
+                       ncpus=4,window=window.val, dates.occ=dates.occ)
+}
+timer2 <- Sys.time()
+print(difftime(timer2,timer1,units="mins"))
+fId <- file.path(outputDir,paste0("bs_TC_time_window_",window.val,"_",dataFilter,".RData"))
+save(estN.bs, file=fId)
 
 
-p1 <- qplot(N.time$x, N.time$y, geom="line") +
-  xlab("Date") +
-  ylab("N") +
+t <- ncol(mtrxCaptD)
+ci.perc <- sapply(1:t, 
+                  function(i) {
+                    cat(paste0("Running index ", i, "...\n"))
+                    ci.tmp <- boot.ci(estN.bs.time, index = i, type="perc")
+                    ci.tmp <- ci.tmp$perc[c(4,5)]
+                  })
+bs.perc.time.ci <- data.frame("bs.ci.l" = ci.perc[1,],
+                         "bs.ci.u" = ci.perc[2,])
+
+# combine data
+N.df <- data.frame(N.time, bs.perc.time.ci)
+colnames(N.df)[1:2] <- c("Date", "N")
+
+# plot
+p1 <- ggplot(N.df, aes(x=Date, y=N)) +
+  geom_line() +
+  geom_ribbon(aes(ymin=bs.ci.l, ymax=bs.ci.u), alpha=0.2) +
   ggtitle("CR estimates of abundance for TC capture data with respect to time.") +  
   theme_bw()
 print(p1)
 ggsave(file=file.path(plotDir,paste0("TC_CR_time_window_20_",dataFilter,".png")),width=14,height=8)
-
+                  
+    

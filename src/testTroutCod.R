@@ -1,8 +1,9 @@
 source("./src/init.R")
 
-# input
-# choose from young, adult or all
-dataFilter <- "all"
+#### input
+dataFilter <- "all" #choose from young, adult or all
+nB <- 5000            #number of bootstraps
+window.val <- 20      #number of occasions either side of current occasion
 
 # load data
 data <- read.csv(file.path(dataDir,"TC_Data_Charles.csv"))
@@ -114,10 +115,6 @@ rm(tmp)
 dates.occ <- N_D.df[,c("Date","Occasion")]
 dates.min <- min(dates.occ$Date)
 dates.occ$Day <- as.numeric(difftime(dates.occ$Date, dates.min, units="days"))
-#dates.diff <- max(dates.occ$Date)-min(dates.occ$Date)+1
-#dates.all <- min(dates.occ$Date) + days(0:dates.diff)
-#dates.all <- data.frame("Date" = dates.all)
-#dates.all <- merge(dates.all,dates.occ,all.x=TRUE)
 
 
 
@@ -162,8 +159,6 @@ ggsave(plot2,file=file.path(plotDir,paste0("TC_CR_window_20_",dataFilter,".png")
 # Produce same plots but with confidence intervals
 
 # First bootstrap
-nB <- 5000
-window.val <- 20
 timer1 <- Sys.time()
 if (.Platform$OS.type == "windows") {
   cl <- makeCluster(4, type = "SOCK")
@@ -212,12 +207,11 @@ ggsave(file=file.path(plotDir,paste0("TC_CR_window_20_CI_",dataFilter,".png")),w
 
 
 
-##### now plot against time
+##### same thing but now plot against time
 # get N estimate
 N.time <- calcCR(mtrxCaptD,20, xType="Time", dates.occ=dates.occ)
 
 # get bootstrapped percentile CIs
-window.val <- 20
 timer1 <- Sys.time()
 if (.Platform$OS.type == "windows") {
   cl <- makeCluster(4, type = "SOCK")
@@ -237,7 +231,7 @@ if (.Platform$OS.type == "windows") {
 timer2 <- Sys.time()
 print(difftime(timer2,timer1,units="mins"))
 fId <- file.path(outputDir,paste0("bs_TC_time_window_",window.val,"_",dataFilter,".RData"))
-save(estN.bs, file=fId)
+save(estN.bs.time, file=fId)
 
 
 t <- ncol(mtrxCaptD)

@@ -82,16 +82,26 @@ estN.tidy <- rbind(N_D.df, N_Y.df)
 
 # Plots
 tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
-plot1 <- ggplot(tmp, aes(x=Date, y=N)) + geom_line() + 
+plot1 <- ggplot(tmp, aes(x=Date, y=N)) + 
+  geom_line() + 
+  geom_rug(sides="b") +
   ggtitle("JS estimate of abundance for yearly grouping of TC capture data.") +
   theme_bw()
 
 tmp <- estN.tidy[estN.tidy$Method=="JS on daily grouped data",]
-plot2 <- ggplot(tmp, aes(x=Date, y=N)) + geom_line() + 
+plot2 <- ggplot(tmp, aes(x=Date, y=N)) + 
+  scale_y_log10(breaks=c(1e2,1e3,1e4,1e5,1e6)) +
+  ylab(expression(log[10](N))) +
+  geom_line() + 
+  geom_rug(sides="b") +
   ggtitle("JS estimate of abundance for daily grouping of TC capture data.") +
   theme_bw()
 
-plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, linetype=Method)) + geom_line() + 
+plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, linetype=Method)) + 
+  scale_y_log10(breaks=c(1e2,1e3,1e4,1e5,1e6)) +
+  ylab(expression(log[10](N))) +
+  geom_line() + 
+  geom_rug(sides="b") +
   ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.") +
   theme_bw() +
   theme(legend.position="bottom")

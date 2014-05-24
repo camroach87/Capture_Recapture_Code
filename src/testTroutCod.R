@@ -12,7 +12,8 @@ data <- data[order(data$surveydate),]
 
 # add year to data
 data$year <- year(data$surveydate)
-data$month <- month(data$surveydate)
+data$month <- format(data$surveydate, "%Y-%m")
+data$month <- as.factor(data$month)
 
 # select data filter
 if (dataFilter == "young") {
@@ -26,6 +27,7 @@ if (dataFilter == "young") {
   
 
 mtrxCaptY <- table(data$idfish, data$year)
+mtrxCaptM <- table(data$idfish, data$month)
 mtrxCaptD <- table(data$idfish, data$surveydate)
 
 cat(length(data$idfish), "captures made.\n")
@@ -43,17 +45,9 @@ cat("\n")
 
 
 
-#   # table of next recapture year
-#   mtrxRecaptY <- mtrxCaptY
-#   for (i in 2:ncol(mtrxRecaptY)) {
-#     mtrxRecaptY[,i] <- mtrxRecaptY[,i]+mtrxRecaptY[,i-1]
-#   }
-#   mtrxRecaptY <- mtrxRecaptY - 1
 
-
-
-
-# Jolly Seber population estimates
+#### Jolly Seber population estimates ####
+# Yearly
 tmp <- calcJS(mtrxCaptY)
 N_Y <- tmp[[1]]
 N_Y.ci <- tmp[[2]]
@@ -66,6 +60,21 @@ N_Y.df$Method <- "JS on yearly grouped data"
 rownames(N_Y.df)  <- NULL
 colnames(N_Y.df)[1] <- "N"
 
+#monthly
+tmp <- calcJS(mtrxCaptM)
+N_M <- tmp[[1]]
+N_M.ci <- tmp[[2]]
+N_M.df <- as.data.frame(N_M)
+
+N_M.df$Date <- ymd(paste0(rownames(N_M.df),"-01"))
+N_M.df$Occasion <- c(1:(dim(N_M.df)[1]))
+N_M.df$Method <- "JS on monthly grouped data"
+rownames(N_M.df)  <- NULL
+colnames(N_M.df)[1] <- "N"
+
+
+
+# daily
 tmp <- calcJS(mtrxCaptD)
 N_D <- tmp[[1]]
 N_D.ci <- tmp[[2]]
@@ -78,7 +87,7 @@ colnames(N_D.df)[1] <- "N"
 
 
 # Combine all data frames
-estN.tidy <- rbind(N_D.df, N_Y.df)
+estN.tidy <- rbind(N_D.df, N_Y.df, N_M.df)
 
 # Plots
 tmp <- estN.tidy[estN.tidy$Method=="JS on yearly grouped data",]
@@ -102,16 +111,24 @@ plot3 <- ggplot(estN.tidy, aes(x=Date, y=N, linetype=Method)) +
   ylab(expression(log[10](N))) +
   geom_line() + 
   geom_rug(sides="b") +
-  ggtitle("Comparison of JS estimate of abundance for daily and yearly grouping of TC capture data.") +
+  ggtitle("Comparison of JS estimate of abundance for different grouping of TC capture data.") +
   theme_bw() +
   theme(legend.position="bottom")
+
+plot4 <- ggplot(estN.tidy, aes(x=Date, y=N, linetype=Method)) + 
+  ggtitle("Comparison of smoothed JS estimates of abundance for different grouping of TC capture data.") +
+  theme_bw() +
+  theme(legend.position="bottom") + 
+  stat_smooth(se=FALSE, colour="black")
 
 print(plot1)
 print(plot2)
 print(plot3)
+print(plot4)
 ggsave(plot1,file=file.path(plotDir,paste0("TC_JS_y_",dataFilter,".png")),width=14,height=8)
 ggsave(plot2,file=file.path(plotDir,paste0("TC_JS_d_",dataFilter,".png")),width=14,height=8)
 ggsave(plot3,file=file.path(plotDir,paste0("TC_JS_y_d_",dataFilter,".png")),width=14,height=8)
+ggsave(plot4,file=file.path(plotDir,paste0("TC_JS_y_d_smooth_",dataFilter,".png")),width=14,height=8)
 rm(tmp)
 
 

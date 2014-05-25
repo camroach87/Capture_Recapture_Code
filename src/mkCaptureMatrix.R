@@ -1,14 +1,13 @@
 ############################### PREAMBLE ################################
 # PROGRAM: Make capture matrices
 # CODER: Cameron Roach
-# DATE: 9/7/2013
 # DESCRIPTION: Constructs various capture matrices using either a datafile of
 # capture occasions or by simulation.
 
 
 
 
-################################## Functions ##################################
+#### Functions ####
 
 mkCloseCaptMtrx <- function(N.0, t, pCapture) {
   # Simulates closed population. N.0 is initial population size.

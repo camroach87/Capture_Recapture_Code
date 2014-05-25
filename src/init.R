@@ -1,8 +1,7 @@
 ############################### PREAMBLE ################################
-# PROGRAM: main
+# PROGRAM: init
 # CODER: Cameron Roach
-# DATE: 24/2/2014
-# DESCRIPTION: Sets directories and calls programs
+# DESCRIPTION: Sets directories and loads packages
 
 rm(list=ls())
 

@@ -1,3 +1,8 @@
+############################### PREAMBLE ################################
+# PROGRAM: Test trout cod
+# CODER: Cameron Roach
+# DESCRIPTION: Tests trout cod data provided by DSE
+
 source("./src/init.R")
 
 #### input

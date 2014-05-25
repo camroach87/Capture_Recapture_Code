@@ -1,3 +1,9 @@
+############################### PREAMBLE ################################
+# PROGRAM: Test open simulation
+# CODER: Cameron Roach
+# DESCRIPTION: Tests simulated open population data
+
+
 source("./src/init.R")
 
 # Open population sim

@@ -1,16 +1,11 @@
-#### Preamble ####
-
+############################### PREAMBLE ################################
 # PROGRAM: Get estimators
 # CODER: Cameron Roach
-# DATE: 24/2/2014
 # DESCRIPTION: Various functions to produce capture-recapture estimators
 
 
 
-
-
-
-######################### Estimators #####################
+#### Estimators ####
 
 calcCR <- function(mtrxCapt, window, xType="Occasion", timeBandwidth=180, dates.occ) {
   # DESCRIPTION: Estimates population by splitting sampling timeline into 
